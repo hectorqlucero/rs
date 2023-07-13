@@ -38,6 +38,9 @@ An Realstate application
 ## Database migrations
 Go to project directory and type: lein migrate
 
+## Populate table with default values
+Go to project directory and type: lein database
+
 ## Running
 Go to project directory and type: Lein run
 
