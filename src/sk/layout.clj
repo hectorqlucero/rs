@@ -117,38 +117,41 @@
                   :href "data:image/x-icon;,"}]]
          [:body
           [:div.easyui-navpanel
-           [:div.m-toolbar
-            (cond
-              (= ok -1) (menus-none)
-              (= ok 0) (menus-public)
-              (> ok 0) (menus-private))]
+           [:header
+            [:div.m-toolbar
+             (cond
+               (= ok -1) (menus-none)
+               (= ok 0) (menus-public)
+               (> ok 0) (menus-private))]]
            content
-           [:div.m-toolbar
-            [:footer.bg-secondary.text-center.fixed-bottom
-             [:span  "Copyright &copy" (t/year (t/now)) " Lucero Systems - All Rights Reserved"]]]]
+           [:footer
+            [:div.m-toolbar
+             [:div.m-title  "Copyright &copy" (t/year (t/now)) " Lucero Systems - All Rights Reserved"]]]]
           (app-js)
           js]))
 
 (defn error-404 [content return-url]
   (html5 {:ng-app (:site-name config) :lang "es"}
          [:head
-          [:title "Mesaje"]
+          [:title "Mensaje"]
           [:meta {:charset "UTF-8"}]
           [:meta {:name "viewport"
-                  :content "width=device-width, initial-scale=1"}]
+                  :content "initial-scale=1.0,maximum-scale=1.0,user-scalable=no"}]
           (app-css)
-          [:link {:rel "shortcut iconcompojure"
+          [:link {:rel "shortcut icon"
                   :type "image/x-icon"
                   :href "data:image/x-icon;,"}]]
-         [:body {:style "width:100vw;height:98vh;border:1px solid #000;"}
-          [:div.container {:style "height:88vh;margin-top:75px;"}
-           (menus-none)
+         [:body
+          [:div.easyui-navpanel
+           [:header
+            [:div.m-toolbar
+             (menus-none)]]
            [:div.easyui-panel {:data-options "fit:true,border:false" :style "padding-left:14px;"}
             [:div
              [:p [:h3 [:b "Mensaje: "]] content]
-             [:p [:h3 [:a {:href return-url} "Clic aqui para " [:strong "Continuar"]]]]]]]
-
+             [:p [:h3 [:a {:href return-url} "Clic aqui para " [:strong "Continuar"]]]]]]
+           [:footer
+            [:div.m-toolbar
+             [:div.m-title  "Copyright &copy" (t/year (t/now)) " Lucero Systems - All Rights Reserved"]]]]
           (app-js)
-          nil]
-         [:footer.bg-secondary.text-center.fixed-bottom
-          [:span  "Copyright &copy" (t/year (t/now)) " Lucero Systems - All Rights Reserved"]]))
+          nil]))
