@@ -80,4 +80,5 @@
   (GET "/clientes/reporte" req [] (clientes-output/clientes-reporte req))
   (GET "/clientes/pdf" req [] (clientes-output/clientes-pdf req))
   (GET "/clientes/csv" req [] (clientes-output/clientes-csv req))
-  (GET "/clientes/get_casas/:clientes_id" [clientes_id] (clientes-output/get-casas clientes_id)))
+  (GET "/clientes/get_casas/:id" [id] (clientes-output/get-casas id))
+  (GET "/clientes-activos" req [] (clientes-output/clientes-activos req)))

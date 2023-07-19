@@ -9,7 +9,14 @@
    [sk.layout :refer [application]]
    [sk.models.util :refer [get-session-id user-level]]
    [sk.handlers.clientes.model :refer [get-rows]]
-   [sk.handlers.clientes.view :refer [clientes-view clientes-scripts casas-view]]))
+   [sk.handlers.clientes.view :refer [clientes-view clientes-activos-view clientes-scripts casas-view]]))
+
+(defn clientes-activos [_]
+  (let [title "Clientes"
+        ok (get-session-id)
+        js (clientes-scripts)
+        content (clientes-activos-view title)]
+    (application title ok js content)))
 
 (defn get-casas [clientes_id]
   (let [content (casas-view clientes_id)]

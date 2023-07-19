@@ -23,6 +23,7 @@
   ORDER BY
   c.nombre,c.paterno,c.materno
   ")
+
 (defn get-rows []
   (Query db [get-rows-sql]))
 ;; End get-rows
@@ -69,8 +70,58 @@
   (Query db [(get-casas-sql clientes_id (get-clientes-row clientes_id))]))
 ;; End get-casas
 
+;; Start pre-qualified clientes
+(def get-row-sql
+  "
+  SELECT
+  c.id,
+  c.nombre,
+  c.paterno,
+  c.materno,
+  c.telefono,
+  c.celular,
+  c.email,
+  c.ingresos,
+  CONCAT('$',format(c.ingresos,2)) as ingresos_formatted,
+  c.pc,
+  CONCAT('$',format(c.pc,2)) as pc_formatted,
+  c.tipo_creditos_id,
+  t.nombre as tipo_creditos
+  FROM clientes c
+  JOIN tipo_creditos t on t.id = c.tipo_creditos_id
+  WHERE c.id = ?
+  ORDER BY
+  c.nombre,c.paterno,c.materno
+  ")
+
+(defn get-clientes-pc-rows []
+  (Query db "select id from clientes where pc > 0"))
+
+(defn process-clientes-available [row]
+  (let [cliente-id (:id row)
+        crows (get-casas cliente-id)
+        c-count (count crows)]
+    (when (> c-count 0) cliente-id)))
+
+(defn get-clientes-available []
+  (let [crows (get-clientes-pc-rows)
+        cids (remove nil? (map process-clientes-available (get-clientes-pc-rows)))]
+    cids))
+
+(defn get-row [cliente-id]
+  (Query db [get-row-sql cliente-id]))
+
+(defn get-available-clientes []
+  (let [cids (get-clientes-available)
+        rows (map get-row cids)]
+    (flatten rows)))
+;; End get pre-qualified clientes
+
 (comment
+  (get-available-clientes)
+  (get-clientes-available)
+  (get-clientes-pc-rows)
   (get-clientes-row 8)
   (get-casas-sql 8 (get-clientes-row 8))
-  (get-casas 8)
+  (count (get-casas 8))
   (get-rows))
