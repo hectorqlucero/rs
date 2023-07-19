@@ -118,7 +118,7 @@
          [:body
           [:div.easyui-navpanel
            [:header
-            [:div.m-toolbar
+            [:div.m-toolbar {:style "margin-bottom:30px;"}
              (cond
                (= ok -1) (menus-none)
                (= ok 0) (menus-public)
