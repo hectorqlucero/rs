@@ -47,61 +47,40 @@
    [:td (:pc_formatted row)]
    [:td (:tipo_creditos row)]])
 
+(defn process-clientes [title rows]
+  (list
+   [:table.dg {:data-options "remoteSort:false,fit:true,rownumbers:true,fitColumns:true,toolbar:'#toolbar'" :title title}
+    [:thead
+     [:tr
+      [:th {:data-options "field:'id',sortable:true,width:100"} "ID"]
+      [:th {:data-options "field:'nombre',sortable:true,width:100"} "NOMBRE"]
+      [:th {:data-options "field:'paterno',sortable:true,width:100"} "PATERNO"]
+      [:th {:data-options "field:'materno',sortable:true,width:100"} "MATERNO"]
+      [:th {:data-options "field:'telefono',sortable:true,width:100"} "TELEFONO"]
+      [:th {:data-options "field:'celular',sortable:true,width:100"} "CELULAR"]
+      [:th {:data-options "field:'email',sortable:true,width:100"} "EMAIL"]
+      [:th {:data-options "field:'ingresos_formatted',sortable:true,width:100"} "INGRESOS"]
+      [:th {:data-options "field:'pc_formatted',sortable:true,width:100"} "PC"]
+      [:th {:data-options "field:'tipo_creditos',sortable:true,width:100"} "TIPO CREDITO"]]]
+    [:tbody (map my-body rows)]]
+   [:div#toolbar
+    [:a {:href "/clientes/reporte"
+         :class "easyui-linkbutton"
+         :data-options "iconCls:'icon-print',plain: true"} "Reporte"]
+    [:a {:href "/clientes/pdf"
+         :class "easyui-linkbutton"
+         :data-options "iconCls:'icon-save',plain: true"} "PDF"]
+    [:a {:href "/clientes/csv"
+         :class "easyui-linkbutton"
+         :data-options "iconCls:'icon-large-smartart',plain: true"} "CSV"]]))
+
 (defn clientes-view [title]
   (let [rows (get-rows)]
-    (list
-     [:table.dg {:data-options "remoteSort:false,fit:true,rownumbers:true,fitColumns:true,toolbar:'#toolbar'" :title title}
-      [:thead
-       [:tr
-        [:th {:data-options "field:'id',sortable:true,width:100"} "ID"]
-        [:th {:data-options "field:'nombre',sortable:true,width:100"} "NOMBRE"]
-        [:th {:data-options "field:'paterno',sortable:true,width:100"} "PATERNO"]
-        [:th {:data-options "field:'materno',sortable:true,width:100"} "MATERNO"]
-        [:th {:data-options "field:'telefono',sortable:true,width:100"} "TELEFONO"]
-        [:th {:data-options "field:'celular',sortable:true,width:100"} "CELULAR"]
-        [:th {:data-options "field:'email',sortable:true,width:100"} "EMAIL"]
-        [:th {:data-options "field:'ingresos_formatted',sortable:true,width:100"} "INGRESOS"]
-        [:th {:data-options "field:'pc_formatted',sortable:true,width:100"} "PC"]
-        [:th {:data-options "field:'tipo_creditos',sortable:true,width:100"} "TIPO CREDITO"]]]
-      [:tbody (map my-body rows)]]
-     [:div#toolbar
-      [:a {:href "/clientes/reporte"
-           :class "easyui-linkbutton"
-           :data-options "iconCls:'icon-print',plain: true"} "Reporte"]
-      [:a {:href "/clientes/pdf"
-           :class "easyui-linkbutton"
-           :data-options "iconCls:'icon-save',plain: true"} "PDF"]
-      [:a {:href "/clientes/csv"
-           :class "easyui-linkbutton"
-           :data-options "iconCls:'icon-large-smartart',plain: true"} "CSV"]])))
+    (process-clientes title rows)))
 
 (defn clientes-activos-view [title]
   (let [rows (get-available-clientes)]
-    (list
-     [:table.dg {:data-options "remoteSort:false,fit:true,rownumbers:true,fitColumns:true,toolbar:'#toolbar'" :title title}
-      [:thead
-       [:tr
-        [:th {:data-options "field:'id',sortable:true,width:100"} "ID"]
-        [:th {:data-options "field:'nombre',sortable:true,width:100"} "NOMBRE"]
-        [:th {:data-options "field:'paterno',sortable:true,width:100"} "PATERNO"]
-        [:th {:data-options "field:'materno',sortable:true,width:100"} "MATERNO"]
-        [:th {:data-options "field:'telefono',sortable:true,width:100"} "TELEFONO"]
-        [:th {:data-options "field:'celular',sortable:true,width:100"} "CELULAR"]
-        [:th {:data-options "field:'email',sortable:true,width:100"} "EMAIL"]
-        [:th {:data-options "field:'ingresos_formatted',sortable:true,width:100"} "INGRESOS"]
-        [:th {:data-options "field:'pc_formatted',sortable:true,width:100"} "PC"]
-        [:th {:data-options "field:'tipo_creditos',sortable:true,width:100"} "TIPO CREDITO"]]]
-      [:tbody (map my-body rows)]]
-     [:div#toolbar
-      [:a {:href "/clientes/reporte"
-           :class "easyui-linkbutton"
-           :data-options "iconCls:'icon-print',plain: true"} "Reporte"]
-      [:a {:href "/clientes/pdf"
-           :class "easyui-linkbutton"
-           :data-options "iconCls:'icon-save',plain: true"} "PDF"]
-      [:a {:href "/clientes/csv"
-           :class "easyui-linkbutton"
-           :data-options "iconCls:'icon-large-smartart',plain: true"} "CSV"]])))
+    (process-clientes title rows)))
 
 (defn clientes-scripts []
   (include-js "js/clientesView.js"))
