@@ -118,6 +118,9 @@
 ;; End get pre-qualified clientes
 
 (comment
+  (get-row [6 8 12 17 19 21])
+  (get-clientes-available)
+  (get-clientes-pc-rows)
   (get-available-clientes)
   (get-clientes-available)
   (get-clientes-pc-rows)
