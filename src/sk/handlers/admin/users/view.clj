@@ -1,156 +1,129 @@
 (ns sk.handlers.admin.users.view
-  (:require [hiccup.page :refer [include-js]]
-            [ring.util.anti-forgery :refer [anti-forgery-field]]
-            [sk.migrations :refer [config]]
-            [sk.models.util :refer [build-dialog build-dialog-buttons
-                                    build-field build-image-field
-                                    build-image-field-script build-radio-buttons build-table]]))
+  (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
+            [sk.models.form :refer [form
+                                    build-hidden-field
+                                    build-field
+                                    build-select
+                                    build-radio
+                                    build-modal-buttons]]
+            [sk.models.grid :refer [build-grid
+                                    build-modal
+                                    modal-script]]))
 
-(def dialog-fields
+(defn users-view
+  [title rows]
+  (let [table-id "users_table"
+        labels ["apellido paterno"
+                "nombre"
+                "usuario"
+                "fecha de nacimiento"
+                "celular"
+                "nivel"
+                "status"]
+        db-fields [:lastname
+                   :firstname
+                   :username
+                   :dob_formatted
+                   :cell
+                   :level_formatted
+                   :active_formatted]
+        fields (zipmap db-fields labels)
+        href "/admin/users"]
+    (build-grid title rows table-id fields href)))
+
+;; Start users-form
+(defn build-users-fields
+  [row]
   (list
-   [:input {:type "hidden" :id "id" :name "id"}]
-   (build-image-field)
-   (build-field
-    {:id           "username"
-     :name         "username"
-     :class        "easyui-textbox easyui-validatebox"
-     :validType    "email"
-     :prompt       "someone@server.com - correo electronico"
-     :data-options "label:'Usuario:',
-                     labelPosition:'top',
-                     width:'100%',required: true"})
-   (build-field
-    {:id           "firstname"
-     :name         "firstname"
-     :class        "easyui-textbox"
-     :prompt       "Nombre ej. Pedro"
-     :data-options "label:'Nombre:',
-                     labelPosition:'top',
-                     width:'100%',required: true"})
-   (build-field
-    {:id           "lastname"
-     :name         "lastname"
-     :class        "easyui-textbox"
-     :prompt       "Apellidos ej. Lopez Contreras"
-     :data-options "label:'Apellidos:',
-                     labelPosition:'top',
-                     width:'100%',required: true"})
-   (build-field
-    {:id           "dob"
-     :name         "dob"
-     :class        "easyui-datebox"
-     :prompt       "mm/dd/yyyy"
-     :data-options "label:'Fecha de nacimiento:',
-                     labelPosition:'top',
-                     width:'100%',required: false"})
-   (build-field
-    {:id           "email"
-     :name         "email"
-     :class        "easyui-textbox easyui-validatebox"
-     :prompt       "Email aqui..."
-     :validType    "email"
-     :data-options "label:'Email:',
-                     labelPosition:'top',
-                     width:'100%',required: false"})
-   (build-field
-    {:id "level"
-     :name "level"
-     :class "easyui-combobox"
-     :data-options "label:'Nivel de Usuario:',
-                     labelPosition:'top',
-                     url:'/table_ref/levels',
-                     method:'GET',
-                     required:true,
-                     width:'100%'"})
-   (build-radio-buttons
-    "Activo?"
-    (list
-     {:id "active_no"
-      :name "active"
-      :class "easyui-radiobutton"
-      :value "F"
-      :data-options "label:'No', checked:true"}
-     {:id "active_yes"
-      :name "active"
-      :class "easyui-radiobutton"
-      :value "T"
-      :data-options "label:'Si'"}))))
+   (build-hidden-field {:id "id"
+                        :name "id"
+                        :value (:id row)})
+   (build-field {:label "Apellido Paterno:"
+                 :type "text"
+                 :id "lastname"
+                 :name "lastname"
+                 :required "true"
+                 :error "El apellido paterno es un campo requerido..."
+                 :placeholder "Apellido paterno aqui..."
+                 :value (:lastname row)})
+   (build-field {:label "Nombre:"
+                 :type "text"
+                 :id "firstname"
+                 :name "firstname"
+                 :required "true"
+                 :error "El nombre es un campo requrerido..."
+                 :placeholder "El nombre aqui..."
+                 :value (:firstname row)})
+   (build-field {:label "Usuario:"
+                 :type "email"
+                 :id "username"
+                 :name "username"
+                 :required "true"
+                 :error "El usuario es un campo requerido..."
+                 :placeholder "El email del usuario aqui..."
+                 :value (:username row)})
+   (build-field {:label "Fecha de nacimiento:"
+                 :type "date"
+                 :id "dob"
+                 :name "dob"
+                 :required "false"
+                 :error nil
+                 :value (:dob row)})
+   (build-field {:label "Celular:"
+                 :type "text"
+                 :id "cell"
+                 :name "cell"
+                 :required "false"
+                 :error nil
+                 :value (:cell row)})
+   (build-select {:label "Nivel de Usuario:"
+                  :id "level"
+                  :name "level"
+                  :required "true"
+                  :error "El nivel es un campo requerido..."
+                  :value (:level row)
+                  :options [{:value ""
+                             :label "Seleccionar nivel..."}
+                            {:value "U"
+                             :label "Usuario"}
+                            {:value "A"
+                             :label "Administrador"}
+                            {:value "S"
+                             :label "Sistema"}]})
+   (build-radio {:label "Estado:"
+                 :name "active"
+                 :value (:active row)
+                 :options [{:id "activeT"
+                            :label "Activo"
+                            :value "T"}
+                           {:id "activeF"
+                            :label "Inactivo"
+                            :value "F"}]})))
 
-(defn users-view [title]
+(defn build-users-form
+  [title row]
+  (let [fields (build-users-fields row)
+        href "/admin/users/save"
+        buttons (build-modal-buttons)]
+    (form href fields buttons)))
+;; End users-form
+
+(defn build-users-modal
+  [title row]
+  (build-modal title row (build-users-form title row)))
+
+(defn users-edit-view
+  [title row rows]
   (list
-   (anti-forgery-field)
-   (build-table
-    title
-    "/admin/users"
-    (list
-     [:th {:data-options "field:'username',sortable:true,fixed:false,width:100"} "Usuario [clic para seleccionar]"]
-     [:th {:data-options "field:'imagen',sortable:true,fixed:false,width:100"
-           :formatter "imagenShow"} "Foto [clic foto +-]"]
-     [:th {:data-options "field:'lastname',sortable:true,fixed:false,width:100"} "Apellidos"]
-     [:th {:data-options "field:'firstname',sortable:true,fixed:true,width:100"} "Nombre"]
-     [:th {:data-options "field:'level',sortable:true,fixed:true,width:100"
-           :formatter "levelDesc"} "Nivel"]
-     [:th {:data-options "field:'active',sortable:true,fixed:false,width:100"
-           :formatter "statusDesc"} "Activo?"]))
-   (list ;Here we build a toolbar without the New button - we don't want to create users
-    [:div#toolbar
-     [:a {:href         "javascript:void(0)"
-          :class        "easyui-linkbutton"
-          :data-options "iconCls: 'icon-edit',plain: true"
-          :onclick      "editItem({})"} "Editar"]
-     [:a {:href         "javascript:void(0)"
-          :class        "easyui-linkbutton"
-          :data-options "iconCls: 'icon-remove',plain: true"
-          :onclick      "deleteItem()"} "Remover"]
-     [:div {:style "float: right"}]])
-   (build-dialog title dialog-fields)
-   (build-dialog-buttons)))
+   (users-view "Users Maintenance" rows)
+   (build-users-modal title row)))
 
-(defn users-scripts []
+(defn users-add-view
+  [title row rows]
   (list
-   (include-js "/js/grid.js")
-   [:script
-    (build-image-field-script)
-    (str
-     "
-  function resizeImage(imgObject) {
-    var img = $('#'+imgObject.id);
-    if(img.width() < 500) {
-      img.animate({width: '500', height: '500'}, 1000);
-    } else {
-      img.animate({width: img.attr(\"width\"), height: img.attr(\"height\")}, 1000);
-    }
-  }
+   (users-view "Users Maintenance" rows)
+   (build-users-modal title row)))
 
-  function imagenShow(val, row, index) {
-    if(row.imagen !== null) {
-      let d = new Date();
-      let imgValue = val;
-      let imgError = 'this.src=\"/images/placeholder_profile.png\"';
-      let imgPath = " (:path config) ";
-      let imgSrc = imgPath + imgValue + '?' + d.getTime();
-      let imgTag = '<img id=img'+index+' src='+imgSrc+' onError='+imgError+' width=95 height=71 onclick=resizeImage(this) />';
-      return imgTag;
-    } else {
-      return row.imagen;
-    }
-  }
-
-  function levelDesc(val, row, index) {
-    if(row.level == 'A') {
-      return 'Administrador';
-    } else if(row.level == 'U') {
-      return 'Usuario';
-    } else if(row.level == 'S') {
-      return 'Sistema';
-    }
-  }
-
-  function statusDesc(val, row, index) {
-    if(row.active == 'T') {
-      return 'Si';
-    } else {
-      return 'No';
-    }
-  }
-  ")]))
+(defn users-modal-script
+  []
+  (modal-script))

@@ -1,53 +1,36 @@
-# rs
+# sk
 
-An Realstate application
+FIXME: description
 
+## Installation
 
-## Pre-requisites
-1. leiningen 2.0.0 or above installed
-2. jdk8 or above
-3. mySQL or MariaDB
+Download from http://example.com/FIXME.
 
 ## Usage
-1. Create a database "xxxxxxxxxx" in mySQL or MariaDB.  Note: "xxxxxxxxxx" refers to what you will call your database, so replace with your database name created.
-2. Clone the repository
-3. Copy resources/private/config_example to config.clj and change all of the "xxxxxxxxxx" to what applies to you setup
-  Example of resources/private/config_example.clj
-  ```
-  {:db-protocol    "mysql"
-  :db-name        "//localhost:3306/xxxxxxxxxxx?characterEncoding=UTF-8"
-  :db-user        "root"
-  :db-pwd         "xxxxxxxxxx"
-  :db-class       "com.mysql.cj.jdbc.Driver"
-  :email-host     "smtp.gmail.com"
-  :email-user     "xxxxxxxxxxx@gmail.com"
-  :email-password "xxxxxxxxxx"
-  :port           3000
-  :tz             "US/Pacific"
-  :site-name      "xxxxxxxxxx"
-  :base-url       "http://0.0.0.0:3000/"
-  :uploads        "./uploads"
-  :path           "/uploads/"}
-  ```
-4. To create the tables needed you can find the information here:
 
-   resources/migrations
+FIXME: explanation
 
-  ```
-  
-## Database migrations
-Go to project directory and type: lein migrate
+    $ java -jar sk-0.1.0-standalone.jar [args]
 
-## Populate table with default values
-Go to project directory and type: lein database
+## Options
 
-## Running
-Go to project directory and type: Lein run
+FIXME: listing of options this app accepts.
 
+## Examples
+
+...
+
+### Bugs
+
+...
+
+### Any Other Sections
+### That You Think
+### Might be Useful
 
 ## License
 
-Copyright © 2019 LS
+Copyright © 2024 FIXME
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

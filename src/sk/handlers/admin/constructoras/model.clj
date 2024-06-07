@@ -1,8 +1,26 @@
 (ns sk.handlers.admin.constructoras.model
-  (:require [sk.models.crud :refer [Query db]]))
+  (:require [sk.models.crud :refer [Query db]]
+            [clojure.string :as st]))
 
-(defn get-rows [tabla]
-  (Query db [(str "select * from " tabla)]))
+(def get-constructoras-sql
+  (str
+   "
+SELECT *
+FROM constructoras
+"))
 
-(comment
-  (get-rows "constructoras"))
+(defn get-constructoras
+  []
+  (Query db get-constructoras-sql))
+
+(def get-constructoras-id-sql
+  (str
+   "
+SELECT *
+FROM constructoras
+WHERE id = ?
+"))
+
+(defn get-constructoras-id
+  [id]
+  (first (Query db [get-constructoras-id-sql id])))

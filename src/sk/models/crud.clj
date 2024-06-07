@@ -1,9 +1,9 @@
 (ns sk.models.crud
-  (:require [cheshire.core :refer [generate-string]]
+  (:require [clojure.java.jdbc :as j]
             [clojure.java.io :as io]
-            [clojure.java.jdbc :as j]
-            [clojure.string :as st]
-            [sk.migrations :refer [config]])
+            [cheshire.core :refer [generate-string]]
+            [sk.migrations :refer [config]]
+            [clojure.string :as st])
   (:import java.text.SimpleDateFormat))
 
 (def db {:classname                       (:db-class config)
@@ -29,95 +29,8 @@
          :zeroDateTimeBehavior            "CONVERT_TO_NULL"}) ; Database connection
 
 (def SALT "897sdn9j98u98kj")                                ; encryption salt for DB                            ; encryption salt for DB
+
 (def KEY (byte-array 16))
-
-(defn aes-in
-  "Encrypt a value MySQL"
-  [value & alias]
-  (try
-    (str "AES_ENCRYPT('" value "','" SALT "')"
-         (when (seq alias)
-           (str " as " (first alias))))
-    (catch Exception e (.getMessage e))))
-
-(defn aes-out
-  "Decrypt a value MySQL"
-  [value & alias]
-  (try
-    (str "AES_DECRYPT('" value "','" SALT "')"
-         (when (seq alias)
-           (str " as " (first alias))))
-    (catch Exception e (.getMessage e))))
-
-(defn aes-sel
-  "Return field decrypted MySQL"
-  [field & alias]
-  (try
-    (str "AES_DECRYPT(" field ",'" SALT "')"
-         (when (seq alias)
-           (str " as " (first alias))))
-    (catch Exception e (.getMessage e))))
-
-(def phone_mask "(___) ___-____")
-
-(def phone_mask_ext "(___) ___-____ x_____")
-
-(def date_mask "mm/dd/YYYY")
-
-(def n4_mask "____")
-
-(def n5_mask "_____")
-
-(defn cleanup_blanks
-  [v]
-  (try
-    (when-not (clojure.string/blank? v) v)
-    (catch Exception e (.getMessage e))))
-
-(defn cleanup_phones
-  [v]
-  (try
-    (when-not (= v phone_mask) v)
-    (catch Exception e (.getMessage e))))
-
-(defn cleanup_phones_ext
-  [v]
-  (try
-    (when-not (= v phone_mask_ext) v)
-    (catch Exception e (.getMessage e))))
-
-(defn cleanup_dates
-  [v]
-  (try
-    (when-not (= v date_mask) v)
-    (catch Exception e (.getMessage e))))
-
-(defn cleanup_n4
-  [v]
-  (try
-    (when-not (= v n4_mask) v)
-    (catch Exception e (.getMessage e))))
-
-(defn cleanup_n5
-  [v]
-  (try
-    (when-not (= v n5_mask) v)
-    (catch Exception e (.getMessage e))))
-
-(defn cleanup
-  "Cleanup row - convert masks or blanks into nil"
-  [row]
-  (try
-    (apply merge
-           (for [[k v] row]
-             (let [value (and (cleanup_blanks v)
-                              (cleanup_phones v)
-                              (cleanup_phones_ext v)
-                              (cleanup_dates v)
-                              (cleanup_n4 v)
-                              (cleanup_n5 v))]
-               {k value})))
-    (catch Exception e (.getMessage e))))
 
 (defn Query
   "queries database accepts query string"
@@ -137,7 +50,7 @@
   "Inserts colums in the specified table"
   [db table row]
   (try
-    (j/insert! db table (cleanup row) {:entities (j/quoted \`)})
+    (j/insert! db table row {:entities (j/quoted \`)})
     (catch Exception e (.getMessage e))))
 
 (defn Insert-multi
@@ -152,7 +65,7 @@
   "Updates columns in the specified table"
   [db table row where-clause]
   (try
-    (j/update! db table (cleanup row) where-clause {:entities (j/quoted \`)})
+    (j/update! db table row where-clause {:entities (j/quoted \`)})
     (catch Exception e (.getMessage e))))
 
 (defn Delete
@@ -167,16 +80,16 @@
   [db table row where-clause]
   (try
     (j/with-db-transaction [t-con db]
-      (let [result (j/update! t-con table (cleanup row) where-clause {:entities (j/quoted \`)})]
+      (let [result (j/update! t-con table row where-clause {:entities (j/quoted \`)})]
         (if (zero? (first result))
-          (j/insert! t-con table (cleanup row) {:entities (j/quoted \`)})
+          (j/insert! t-con table row {:entities (j/quoted \`)})
           result)))
     (catch Exception e (.getMessage e))))
 
 (defn crud-fix-id
   [v]
   (try
-    (if (clojure.string/blank? v) nil v)
+    (if (clojure.string/blank? v) (Integer. 0) v)
     (catch Exception e (.getMessage e))))
 
 (defn crud-capitalize-words
@@ -207,14 +120,6 @@
     (Query db (str "DESCRIBE " table))
     (catch Exception e (.getMessage e))))
 
-(defn get-table-describe-extra
-  [table]
-  (try
-    (let [trows (Query db (str "DESCRIBE " table))
-          rows (map #(assoc % :field (str table "." (:field %))) trows)]
-      rows)
-    (catch Exception e (.getMessage e))))
-
 (defn get-table-columns
   [table]
   (try
@@ -234,7 +139,8 @@
       (cond
         (st/includes? field-type "varchar") value
         (st/includes? field-type "char") (st/upper-case value)
-        (st/includes? field-type "date") (crud-format-date-internal value)
+        (st/includes? field-type "int") (if (clojure.string/blank? value) 0 value)
+        ;;(st/includes? field-type "date") (crud-format-date-internal value)
         :else value))
     (catch Exception e (.getMessage e))))
 
@@ -250,25 +156,13 @@
                       (process-field params (:field x) (:type x))})) td)))
     (catch Exception e (.getMessage e))))
 
-(defn build-grid-field
-  [d]
-  (try
-    (let [field (:field d)
-          f_field (get (clojure.string/split field #"\.") 1)
-          field-type (:type d)]
-      (cond
-        (= field-type "date") (str "DATE_FORMAT(" field "," "'%m/%d/%Y') as " (str f_field "_formatted"))
-        (= field-type "time") (str "TIME_FORMAT(" field "," "'%H:%i') as " (str f_field "_formatted"))
-        (= field-type "decimal(15,2)") (str "concat('$',format(" field ",2)) as " (str f_field "_formatted"))))
-    (catch Exception e (.getMessage e))))
-
 (defn build-form-field
   [d]
   (try
     (let [field (:field d)
           field-type (:type d)]
       (cond
-        (= field-type "date") (str "DATE_FORMAT(" field "," "'%m/%d/%Y') as " field)
+        ;;(= field-type "date") (str "DATE_FORMAT(" field "," "'%m/%d/%Y') as " field)
         (= field-type "time") (str "TIME_FORMAT(" field "," "'%H:%i') as " field)
         :else field))
     (catch Exception e (.getMessage e))))
@@ -279,45 +173,30 @@
     (:field (first (filter #(= (:key %) "PRI") d)))
     (catch Exception e (.getMessage e))))
 
-(defn build-grid-columns
-  "Builds grid columns ex. ['c1', 'c2'...]"
-  [table]
-  (try
-    (vec
-     (flatten
-      (map (fn [row]
-             (let [type (:type row)]
-               (cond
-                 (= type "date") [(build-grid-field row) (:field row)]
-                 (= type "time") [(build-grid-field row) (:field row)]
-                 (= type "decimal(15,2)") [(build-grid-field row) (:field row)]
-                 :else (:field row)))) (get-table-describe-extra table))))
-    (catch Exception e (.getMessage e))))
-
 (defn build-form-row
-  "Builds grid form select"
+  "Builds form row"
   [table id]
-  (try
-    (let [tid (get-table-key (get-table-describe table))
-          head "SELECT "
-          body (apply str (interpose #"," (map #(build-form-field %) (get-table-describe table))))
-          foot (str " FROM " table " WHERE " tid " = ?")
-          sql (str head body foot)
-          row (Query db [sql id])]
-      (generate-string (first row)))
-    (catch Exception e (.getMessage e))))
+  (let [tid (get-table-key (get-table-describe table))
+        head "SELECT "
+        body (apply str (interpose #"," (map #(build-form-field %) (get-table-describe table))))
+        foot (str " FROM " table " WHERE " tid " = ?")
+        sql (str head body foot)
+        row (Query db [sql id])]
+    (first row)))
+
+(defn remove-emptys
+  [postvars]
+  (apply dissoc postvars (for [[k v] postvars :when (empty? v)] k)))
 
 (defn process-regular-form
   "Standard form save ex. (build-for-save params 'eventos')"
   [params table]
-  (try
-    (let [id (crud-fix-id (:id params))
-          postvars (build-postvars table params)
-          result (Save db (keyword table) postvars ["id = ?" id])]
-      (if (seq result)
-        (generate-string {:success "Procesado con éxito!"})
-        (generate-string {:error "No se puede procesar!"})))
-    (catch Exception e (.getMessage e))))
+  (let [id (crud-fix-id (:id params))
+        postvars (build-postvars table params)
+        postvars (if (= id 0) (dissoc postvars :id) postvars)
+        postvars (remove-emptys postvars)
+        result (Save db (keyword table) postvars ["id = ?" id])]
+    (if (seq result) true false)))
 
 ;; Start upload form
 (defn crud-upload-image
@@ -341,41 +220,32 @@
 
 (defn process-upload-form
   [params table folder]
-  (try
-    (let [id (crud-fix-id (:id params))
-          file (:file params)
-          postvars (dissoc (build-postvars table params) :file)
-          the-id (str (get-id id postvars table))
-          path (str (:uploads config) folder "/")
-          image-name (crud-upload-image table file the-id path)
-          postvars (assoc postvars :imagen image-name :id the-id)
-          result (Save db (keyword table) postvars ["id = ?" the-id])]
-      (if (seq result)
-        (generate-string {:success "Procesado con éxito!"})
-        (generate-string {:error "No se puede procesar!"})))
-    (catch Exception e (.getMessage e))))
+  (let [id (crud-fix-id (:id params))
+        file (:file params)
+        postvars (dissoc (build-postvars table params) :file)
+        postvars (if (= id 0) (dissoc postvars :id) postvars)
+        postvars (remove-emptys postvars)
+        the-id (str (get-id id postvars table))
+        path (str (:uploads config) folder "/")
+        image-name (crud-upload-image table file the-id path)
+        postvars (assoc postvars :imagen image-name :id the-id)
+        result (Save db (keyword table) postvars ["id = ?" the-id])]
+    (if (seq result) true false)))
 ;; End upload form
 
 (defn build-form-save
+  "Builds form save"
   [params table & args]
-  (try
-    (if-not (nil? (:file params))
-      (process-upload-form params table (first (:path args)))
-      (process-regular-form params table))
-    (catch Exception e (.getMessage e))))
+  (if-not (nil? (:file params))
+    (process-upload-form params table (first (:path args)))
+    (process-regular-form params table)))
 
 (defn build-form-delete
-  "Standard form delete ex. (build-form-delete params)"
-  [params table]
-  (try
-    (let [id (:id params nil)
-          result (if-not (nil? id)
-                   (Delete db (keyword table) ["id = ?" id])
-                   nil)]
-      (if (seq result)
-        (generate-string {:success "Eliminado con éxito!"})
-        (generate-string {:error "Incapaz de eliminar!"})))
-    (catch Exception e (.getMessage e))))
+  [table id]
+  (let [result (if-not (nil? id)
+                 (Delete db (keyword table) ["id = ?" id])
+                 nil)]
+    (if (seq result) true false)))
 
 (comment
-  (:port config))
+  (Query db "select * from users"))

@@ -1,153 +1,126 @@
 (ns sk.handlers.admin.clientes.view
-  (:require
-   [hiccup.page :refer [include-js]]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]
-   [sk.models.util :refer
-    [build-dialog build-dialog-buttons build-field build-table build-toolbar]]))
+  (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
+            [sk.handlers.admin.clientes.model :refer [tipo_creditos_id-options]]
+            [sk.models.form :refer [form build-hidden-field build-field build-select build-radio build-modal-buttons build-textarea]]
+            [sk.models.grid :refer [build-grid build-modal modal-script]]))
 
-(defn dialog-fields []
-  (list
-   (build-field
-    {:id "id"
-     :name "id"
-     :type "hidden"})
-   (build-field
-    {:id "nombre"
-     :name "nombre"
-     :class "easyui-textbox"
-     :prompt "Nombre del cliente..."
-     :data-options "label:'Nombre:',
-        labelPosition:'top',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "paterno"
-     :name "paterno"
-     :class "easyui-textbox"
-     :prompt "Apellido paterno del cliente..."
-     :data-options "label:'Paterno:',
-        labelPosition:'top',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "materno"
-     :name "materno"
-     :class "easyui-textbox"
-     :prompt "Apellido materno del cliente..."
-     :data-options "label:'Materno:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "telefono"
-     :name "telefono"
-     :class "easyui-textbox"
-     :prompt "Telefono del cliente..."
-     :data-options "label:'Telefono:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "celular"
-     :name "celular"
-     :class "easyui-textbox"
-     :prompt "Celular del cliente..."
-     :data-options "label:'Celular:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "email"
-     :name "email"
-     :class "easyui-textbox"
-     :prompt "Email del cliente..."
-     :data-options "label:'Email:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "ingresos"
-     :name "ingresos"
-     :class "easyui-numberbox"
-     :prompt "Ingresos del cliente..."
-     :data-options "label:'Ingresos:',
-        labelPosition:'top',
-        min:0,
-        precision:2,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "pc"
-     :name "pc"
-     :class "easyui-numberbox"
-     :prompt "Precalificación del cliente..."
-     :data-options "label:'Pre Calificación:',
-        labelPosition:'top',
-        min:0,
-        precision:2,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "tipo_creditos_id"
-     :name "tipo_creditos_id"
-     :class "easyui-combobox"
-     :prompt "Tipo de credito del cliente..."
-     :data-options "label:'Tipo Credito:',
-        labelPosition:'top',
-        url:'/table_ref/get_tipo_creditos',
-        method:'GET',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "tipo"
-     :name "tipo"
-     :class "easyui-combobox"
-     :data-options "label:'Renta/Venta',
-        labelPosition:'top',
-        url:'/table_ref/get_tipos',
-        method:'GET',
-        required:true,
-        width:'100%'"})))
+(defn clientes-view
+  [title rows]
+  (let [labels ["NOMBRE" "CELULAR" "EMAIL" "INGRESOS" "PC" "TIPO CREDITO"]
+        db-fields [:nombre_formatted :celular :email :ingresos_formatted :pc_formatted :tipo_creditos_id_formatted]
+        fields (zipmap db-fields labels)
+        table-id "clientes_table"
+        href "/admin/clientes"]
+    (build-grid title rows table-id fields href)))
 
-(defn clientes-view [title]
+(defn build-clientes-fields
+  [row]
   (list
-   (anti-forgery-field)
-   (build-table
-    title
-    "/admin/clientes"
-    (list
-     [:th {:data-options "field:'nombre',sortable:true,width:100"} "NOMBRE"]
-     [:th {:data-options "field:'paterno',sortable:true,width:100"} "PATERNO"]
-     [:th {:data-options "field:'materno',sortable:true,width:100"} "MATERNO"]
-     [:th {:data-options "field:'telefono',sortable:true,width:100"} "TELEFONO"]
-     [:th {:data-options "field:'celular',sortable:true,width:100"} "CELULAR"]
-     [:th {:data-options "field:'email',sortable:true,width:100"} "EMAIL"]
-     [:th {:data-options "field:'tipo',sortable:true,width:100"} "TIPO"]
-     [:th {:data-options "field:'ingresos_formatted',sortable:true,width:100"} "INGRESOS"]
-     [:th {:data-options "field:'pc_formatted',sortable:true,width:100"} "PC"]
-     [:th {:data-options "field:'tipo_creditos_id',sortable:true,width:100"
-           :formatter "get_tipo_credito"} "TIPO CREDITO"]))
-   (build-toolbar)
-   (build-dialog title (dialog-fields))
-   (build-dialog-buttons)))
+   (build-hidden-field {:id "id"
+                        :name "id"
+                        :value (:id row)})
+   (build-field {:label "NOMBRE"
+                 :type "text"
+                 :id "nombre"
+                 :name "nombre"
+                 :placeholder "nombre aqui..."
+                 :required false
+                 :error " "
+                 :value (:nombre row)})
+   (build-field {:label "PATERNO"
+                 :type "text"
+                 :id "paterno"
+                 :name "paterno"
+                 :placeholder "paterno aqui..."
+                 :required false
+                 :error " "
+                 :value (:paterno row)})
+   (build-field {:label "MATERNO"
+                 :type "text"
+                 :id "materno"
+                 :name "materno"
+                 :placeholder "materno aqui..."
+                 :required false
+                 :error " "
+                 :value (:materno row)})
+   (build-field {:label "TELEFONO"
+                 :type "text"
+                 :id "telefono"
+                 :name "telefono"
+                 :placeholder "telefono aqui..."
+                 :required false
+                 :error " "
+                 :value (:telefono row)})
+   (build-field {:label "CELULAR"
+                 :type "text"
+                 :id "celular"
+                 :name "celular"
+                 :placeholder "celular aqui..."
+                 :required false
+                 :error " "
+                 :value (:celular row)})
+   (build-field {:label "EMAIL"
+                 :type "text"
+                 :id "email"
+                 :name "email"
+                 :placeholder "email aqui..."
+                 :required false
+                 :error " "
+                 :value (:email row)})
+   (build-field {:label "INGRESOS"
+                 :type "text"
+                 :id "ingresos"
+                 :name "ingresos"
+                 :placeholder "ingresos aqui..."
+                 :required false
+                 :error " "
+                 :value (:ingresos row)})
+   (build-field {:label "PC"
+                 :type "text"
+                 :id "pc"
+                 :name "pc"
+                 :placeholder "pc aqui..."
+                 :required false
+                 :error " "
+                 :value (:pc row)})
+   (build-select {:label "Tipo de Credito"
+                  :id "tipo_creditos_id"
+                  :name "tipo_creditos_id"
+                  :value (:tipo_creditos_id row)
+                  :options (tipo_creditos_id-options)})
+   (build-radio {:label "TIPO"
+                 :name "tipo"
+                 :value (:tipo row)
+                 :options [{:id "tipoV"
+                            :label "Venta"
+                            :value "V"}
+                           {:id "tipoR"
+                            :label "Renta"
+                            :value "R"}]})))
 
-(defn clientes-scripts []
+(defn build-clientes-form
+  [title row]
+  (let [fields (build-clientes-fields row)
+        href "/admin/clientes/save"
+        buttons (build-modal-buttons)]
+    (form href fields buttons)))
+
+(defn build-clientes-modal
+  [title row]
+  (build-modal title row (build-clientes-form title row)))
+
+(defn clientes-edit-view
+  [title row rows]
   (list
-   (include-js "/js/grid.js")
-   [:script
-    "
-   function get_tipo_credito(val,row,index) {
-    var result = null;
-    var scriptUrl = '/table_ref/get-item/tipo_creditos/nombre/id/' + val;
-    $.ajax({
-      url:scriptUrl,
-      type:'get',
-      dataType:'html',
-      async:false,
-      success:function(data) {
-        result = data;
-      }
-    });
-    return result
-   }
-   "]))
+   (clientes-view "clientes Manteniento" rows)
+   (build-clientes-modal title row)))
+
+(defn clientes-add-view
+  [title row rows]
+  (list
+   (clientes-view "clientes Mantenimiento" rows)
+   (build-clientes-modal title row)))
+
+(defn clientes-modal-script
+  []
+  (modal-script))

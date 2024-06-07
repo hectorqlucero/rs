@@ -1,89 +1,161 @@
 (ns sk.handlers.clientes.view
-  (:require [hiccup.page :refer [include-js]]
-            [sk.handlers.clientes.model :refer [get-rows get-casas get-available-clientes]]
-            [hiccup.core :refer [html]]))
+  (:require [sk.models.grid :refer [build-dashboard
+                                    build-modal
+                                    modal-script]]
+            [sk.handlers.clientes.model :refer [get-casas
+                                                get-clientes
+                                                get-available-clientes
+                                                get-row]]))
 
-(defn get-title [row]
-  (str
-   "Costo: " (:costo row) ", "
-   "Metros Construccion: " (:mtc row) ", "
-   "Metros Terreno: " (:mtt row) ", "
-   "Modelo: " (:modelo row) ", "
-   "Plantas: " (:plantas row) ", "
-   "Recamaras: " (:recamaras row) ", "
-   "Baños: " (:baños row)))
-
-(defn casas-view [clientes_id]
-  (let [rows (get-casas clientes_id)]
-    (list
-     (html
-      [:div.container
-       [:table.table.table-bordered.table-hover
-        [:thead.table-info
-         [:tr
-          [:th "CIUDAD"]
-          [:th "ZONA"]
-          [:th "FRACCIONAMIENTO"]]]
-
-        [:tbody
-         (map (fn [row]
-                [:tr
-                 [:td (:ciudad row)]
-                 [:td (:zona row)]
-                 [:td [:a.easyui-tooltip {:href "#"
-                                          :title (get-title row)
-                                          :position "top"} (:nombre row)]]]) rows)]]]))))
-
-(defn my-body [row]
-  [:tr
-   [:td (:id row)]
-   [:td (:nombre row)]
-   [:td (:paterno row)]
-   [:td (:materno row)]
-   [:td (:telefono row)]
-   [:td (:celular row)]
-   [:td (:email row)]
-   [:td (:ingresos_formatted row)]
-   [:td (:pc_formatted row)]
-   [:td (:tipo_creditos row)]])
-
-(defn process-clientes [title rows]
+(defn clientes-view
+  [title rows]
   (list
-   [:table.dg {:data-options "remoteSort:false,fit:true,rownumbers:true,fitColumns:true,toolbar:'#toolbar'" :title title}
-    [:thead
-     [:tr
-      [:th {:data-options "field:'id',sortable:true,width:100"} "ID"]
-      [:th {:data-options "field:'nombre',sortable:true,width:100"} "NOMBRE"]
-      [:th {:data-options "field:'paterno',sortable:true,width:100"} "PATERNO"]
-      [:th {:data-options "field:'materno',sortable:true,width:100"} "MATERNO"]
-      [:th {:data-options "field:'telefono',sortable:true,width:100"} "TELEFONO"]
-      [:th {:data-options "field:'celular',sortable:true,width:100"} "CELULAR"]
-      [:th {:data-options "field:'email',sortable:true,width:100"} "EMAIL"]
-      [:th {:data-options "field:'ingresos_formatted',sortable:true,width:100"} "INGRESOS"]
-      [:th {:data-options "field:'pc_formatted',sortable:true,width:100"} "PC"]
-      [:th {:data-options "field:'tipo_creditos',sortable:true,width:100"} "TIPO CREDITO"]]]
-    [:tbody (map my-body rows)]]
-   [:div#toolbar
-    [:a {:href "/clientes/reporte"
-         :class "easyui-linkbutton"
-         :data-options "iconCls:'icon-print',plain: true"} "Reporte"]
-    [:a {:href "/clientes/pdf"
-         :class "easyui-linkbutton"
-         :data-options "iconCls:'icon-save',plain: true"} "PDF"]
-    [:a {:href "/clientes/csv"
-         :class "easyui-linkbutton"
-         :data-options "iconCls:'icon-large-smartart',plain: true"} "CSV"]]))
+   [:div.table-responsive
+    [:table.table.table-sm {:id "clientes_table"
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-toggle "true"
+                            :data-show-print "true"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     [:thead
+      [:tr
+       [:th {:data-sortable "true"
+             :data-field ":nombre_completo"} "NOMBRE"]
+       [:th {:data-sortable "true"
+             :data-field ":celular"} "CELULAR"]
+       [:th {:data-sortable "true"
+             :data-field ":email"} "EMAIL"]
+       [:th {:data-sortable "true"
+             :data-field ":ingresos_formatted"} "INGRESOS"]
+       [:th {:data-sortable "true"
+             :data-field ":pc_formatted"} "PC"]
+       [:th {:data-sortable "true"
+             :data-field ":tipo_creditos_id_formatted"} "TIPO DE CREDITO"]
+       [:th {:data-sortable "true"
+             :data-field ":tipo_formatted"} "TIPO"]]]
+     [:tbody
+      (map (fn [row]
+             [:tr
+              [:td (:nombre_completo row)]
+              [:td (:celular row)]
+              [:td (:email row)]
+              [:td (:ingresos_formatted row)]
+              [:td (:pc_formatted row)]
+              [:td (:tipo_creditos_id_formatted row)]
+              [:td (:tipo_formatted row)]]) rows)]]]))
 
-(defn clientes-view [title]
-  (let [rows (get-rows)]
-    (process-clientes title rows)))
+(defn clientes-activos-view
+  [title rows]
+  (list
+   [:div.table-responsive
+    [:table.table.table-sm {:id "clientes_table"
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-toggle "true"
+                            :data-show-print "true"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     [:thead
+      [:tr
+       [:th {:data-sortable "true"
+             :data-field ":nombre_completo"} "NOMBRE"]
+       [:th {:data-sortable "true"
+             :data-field ":celular"} "CELULAR"]
+       [:th {:data-sortable "true"
+             :data-field ":email"} "EMAIL"]
+       [:th {:data-sortable "true"
+             :data-field ":ingresos_formatted"} "INGRESOS"]
+       [:th {:data-sortable "true"
+             :data-field ":pc_formatted"} "PC"]
+       [:th {:data-sortable "true"
+             :data-field ":tipo_creditos"} "TIPO DE CREDITO"]
+       [:th {:data-sortable "true"
+             :data-field ":tipo_formatted"} "TIPO"]
+       [:th.text-nowrap.text-center {:data-sortable "false"
+                                     :style "width:15%;"} "DETALLES"]]]
+     [:tbody
+      (map (fn [row]
+             [:tr
+              [:td (:nombre_completo row)]
+              [:td (:celular row)]
+              [:td (:email row)]
+              [:td (:ingresos_formatted row)]
+              [:td (:pc_formatted row)]
+              [:td (:tipo_creditos row)]
+              [:td (:tipo_formatted row)]
+              [:td.text-nowrap.text-center {:style "width:15%;"}
+               [:a.btn.btn-primary {:role "button"
+                                    :style "margin:1px;"
+                                    :href (str "/clientes/get_casas/" (:id row))} "Detalles"]]]) rows)]]]))
 
-(defn clientes-activos-view [title]
-  (let [rows (get-available-clientes)]
-    (process-clientes title rows)))
+(defn build-house-body
+  [row]
+  (list
+   [:div.card-body
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Ciudad:"]]
+     [:div.col.col-auto.text-nowrap (:ciudad row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Constructora:"]]
+     [:div.col.col-auto.text-nowrap (:razon_social row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Fraccionamiento:"]]
+     [:div.col.col-auto.text-nowrap (:nombre row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Zona:"]]
+     [:div.col.col-auto.text-nowrap (:zona row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Costo:"]]
+     [:div.col.col-auto.text-nowrap (:costo row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Metros Construidos:"]]
+     [:div.col.col-auto.text-nowrap (:mtc row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Metros del Terreno:"]]
+     [:div.col.col-auto.text-nowrap (:mtt row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Modelo:"]]
+     [:div.col.col-auto.text-nowrap (:modelo row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Plantas:"]]
+     [:div.col.col-auto.text-nowrap (:plantas row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Recamaras:"]]
+     [:div.col.col-auto.text-nowrap (:recamaras row)]]
+    [:div.row
+     [:div.col.col-auto [:span.fw-bold.text-nowrap "Baños:"]]
+     [:div.col.col-auto.text-nowrap (:baños row)]]]))
 
-(defn clientes-scripts []
-  (include-js "js/clientesView.js"))
+(defn build-house
+  [title crows]
+  (list
+   [:div.card
+    [:div.card-header title]
+    (map build-house-body crows)
+    [:div.card-footer
+     [:button.btn.btn-primary {:type "button"
+                               :data-dismiss "modal"
+                               :aria-label "Close"
+                               :value "Regresar"} "Regresar"]]]))
+
+(defn casas-view
+  [title clientes-id row rows]
+  (let [crows (get-casas clientes-id)
+        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)]
+    (list
+     (clientes-activos-view title rows)
+     (build-modal title {} (build-house title crows)))))
+
+(defn casas-view-script
+  []
+  (modal-script))
 
 (comment
-  (get-casas 1))
+  (casas-view "testing" 4 (first (get-row 4)) (get-available-clientes)))

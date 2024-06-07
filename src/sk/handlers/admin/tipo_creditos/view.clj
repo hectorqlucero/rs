@@ -1,49 +1,56 @@
 (ns sk.handlers.admin.tipo_creditos.view
-  (:require
-   [hiccup.page :refer [include-js]]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]
-   [sk.models.util :refer
-    [build-dialog build-dialog-buttons build-field build-table build-toolbar]]))
+  (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
+            [sk.models.form :refer [form build-hidden-field build-field build-select build-radio build-modal-buttons build-textarea]]
+            [sk.models.grid :refer [build-grid build-modal modal-script]]))
 
-(defn dialog-fields []
+(defn tipo_creditos-view
+  [title rows]
+  (let [labels ["NOMBRE"]
+        db-fields [:nombre]
+        fields (zipmap db-fields labels)
+        table-id "tipo_creditos_table"
+        args {:new true :delete false :edit true}
+        href "/admin/tipo_creditos"]
+    (build-grid title rows table-id fields href args)))
+
+(defn build-tipo_creditos-fields
+  [row]
   (list
-   (build-field
-    {:id "id"
-     :name "id"
-     :type "hidden"})
-   (build-field
-    {:id "nombre"
-     :name "nombre"
-     :class "easyui-textbox"
-     :prompt "El tipo de credito ej. Infonavit..."
-     :data-options "label:'Credito:',
-        labelPosition:'top',
-        required:true,
-        width:'100%'"})))
+   (build-hidden-field {:id "id"
+                        :name "id"
+                        :value (:id row)})
+   (build-field {:label "NOMBRE"
+                 :type "text"
+                 :id "nombre"
+                 :name "nombre"
+                 :placeholder "nombre aqui..."
+                 :required false
+                 :error " "
+                 :value (:nombre row)})))
 
-(defn special-toolbar []
-  [:div#toolbar
-   [:a {:href         "javascript:void(0)"
-        :class        "easyui-linkbutton"
-        :data-options "iconCls: 'icon-add',plain: true"
-        :onclick      "newItem()"} "Nuevo"]
-   [:a {:href         "javascript:void(0)"
-        :class        "easyui-linkbutton"
-        :data-options "iconCls: 'icon-edit',plain: true"
-        :onclick      "editItem({})"} "Editar"]])
+(defn build-tipo_creditos-form
+  [title row]
+  (let [fields (build-tipo_creditos-fields row)
+        href "/admin/tipo_creditos/save"
+        buttons (build-modal-buttons)]
+    (form href fields buttons)))
 
-(defn tipo_creditos-view [title]
+(defn build-tipo_creditos-modal
+  [title row]
+  (build-modal title row (build-tipo_creditos-form title row)))
+
+(defn tipo_creditos-edit-view
+  [title row rows]
   (list
-   (anti-forgery-field)
-   (build-table
-    title
-    "/admin/tipo_creditos"
-    (list
-     [:th {:data-options "field:'id',sortable:true,width:100"} "ID"]
-     [:th {:data-options "field:'nombre',sortable:true,width:100"} "NOMBRE"]))
-   (special-toolbar)
-   (build-dialog title (dialog-fields))
-   (build-dialog-buttons)))
+   (tipo_creditos-view "tipo de creditos Manteniento" rows)
+   (build-tipo_creditos-modal title row)))
 
-(defn tipo_creditos-scripts []
-  (include-js "/js/grid.js"))
+(defn tipo_creditos-add-view
+  [title row rows]
+  (list
+   (tipo_creditos-view "tipo de creditos Mantenimiento" rows)
+   (build-tipo_creditos-modal title row)))
+
+(defn tipo_creditos-modal-script
+  []
+  (modal-script))

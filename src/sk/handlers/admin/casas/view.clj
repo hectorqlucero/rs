@@ -1,161 +1,135 @@
 (ns sk.handlers.admin.casas.view
-  (:require
-   [hiccup.page :refer [include-js]]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]
-   [sk.models.util :refer
-    [build-dialog build-dialog-buttons build-field build-table build-toolbar]]))
+  (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
+            [sk.handlers.admin.casas.model :refer [fraccionamientos_id-options]]
+            [sk.models.form :refer [form build-hidden-field build-field build-select build-radio build-modal-buttons build-textarea]]
+            [sk.models.grid :refer [build-grid build-modal modal-script]]))
 
-(defn dialog-fields []
-  (list
-   (build-field
-    {:id "id"
-     :name "id"
-     :type "hidden"})
-   (build-field
-    {:id "fraccionamientos_id"
-     :name "fraccionamientos_id"
-     :class "easyui-combobox"
-     :data-options "label:'Fraccionamiento:',
-        labelPosition:'top',
-        url:'/table_ref/get_fraccionamientos',
-        method:'GET',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "modelo"
-     :name "modelo"
-     :class "easyui-textbox"
-     :prompt "El modelo de la casa"
-     :data-options "label:'Modelo:',
-        labelPosition:'top',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "tipo"
-     :name "tipo"
-     :class "easyui-combobox"
-     :data-options "label:'Renta/Venta',
-        labelPosition:'top',
-        url:'/table_ref/get_tipos',
-        method:'GET',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "recamaras"
-     :name "recamaras"
-     :class "easyui-numberbox"
-     :prompt "Numero de recamaras de la casa..."
-     :data-options "label:'Recamaras:',
-        labelPosition:'top',
-        min:0,
-        precision:0,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "baños"
-     :name "baños"
-     :class "easyui-numberbox"
-     :prompt "Numero de baños de la casa..."
-     :data-options "label:'Baños:',
-        labelPosition:'top',
-        min:0,
-        precision:1,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "plantas"
-     :name "plantas"
-     :class "easyui-numberbox"
-     :prompt "Numero de plantas de la casa..."
-     :data-options "label:'Plantas:',
-        labelPosition:'top',
-        min:1,
-        precision:0,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "costo"
-     :name "costo"
-     :class "easyui-numberbox"
-     :prompt "Costo de la casa..."
-     :data-options "label:'Costo:',
-        labelPosition:'top',
-        min:0,
-        precision:2,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "mtc"
-     :name "mtc"
-     :class "easyui-numberbox"
-     :prompt "Metros de construccion de la casa..."
-     :data-options "label:'Metros de Construcción:',
-        labelPosition:'top',
-        min:0,
-        precision:0,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "mtt"
-     :name "mtt"
-     :class "easyui-numberbox"
-     :prompt "Metros del terreno de la casa..."
-     :data-options "label:'Metros del Terreno:',
-        labelPosition:'top',
-        min:0,
-        precision:0,
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "comentarios"
-     :name "comentarios"
-     :class "easyui-textbox"
-     :prompt "Comentarios adicionales de la propiedad..."
-     :data-options "label:'Comentarios:',
-        labelPosition:'top',
-        required:false,
-        multiline:true,
-        height:120,
-        width:'100%'"})))
+(defn casas-view
+  [title rows]
+  (let [labels ["FRACCIONAMIENTO" "MODELO" "TIPO" "RECAMARAS" "BAÑOS" "PLANTAS" "COSTO"]
+        db-fields [:fraccionamientos_id_formatted :modelo :tipo :recamaras :baños :plantas :costo_formatted]
+        fields (zipmap db-fields labels)
+        table-id "casas_table"
+        href "/admin/casas"]
+    (build-grid title rows table-id fields href)))
 
-(defn casas-view [title]
+(defn build-casas-fields
+  [row]
   (list
-   (anti-forgery-field)
-   (build-table
-    title
-    "/admin/casas"
-    (list
-     [:th {:data-options "field:'fraccionamientos_id',sortable:true,width:100"
-           :formatter "get_fraccionamiento"} "FRACC"]
-     [:th {:data-options "field:'modelo',sortable:true,width:100"} "MODELO"]
-     [:th {:data-options "field:'tipo',sortable:true,width:100"} "TIPO"]
-     [:th {:data-options "field:'recamaras',sortable:true,width:100"} "RECAMARAS"]
-     [:th {:data-options "field:'baños',sortable:true,width:100"} "BAÑOS"]
-     [:th {:data-options "field:'plantas',sortable:true,width:100"} "PLANTAS"]
-     [:th {:data-options "field:'costo_formatted',sortable:true,width:100"} "COSTO"]
-     [:th {:data-options "field:'mtc',sortable:true,width:100"} "MC"]
-     [:th {:data-options "field:'mtt',sortable:true,width:100"} "MT"]))
-   (build-toolbar)
-   (build-dialog title (dialog-fields))
-   (build-dialog-buttons)))
+   (build-hidden-field {:id "id"
+                        :name "id"
+                        :value (:id row)})
+   (build-select {:label "FRACCIONAMIENTO"
+                  :id "fraccionamientos_id"
+                  :name "fraccionamientos_id"
+                  :value (:fraccionamientos_id row)
+                  :options (fraccionamientos_id-options)})
+   (build-radio {:label "TIPO"
+                 :name "tipo"
+                 :value (:tipo row)
+                 :options [{:id "tipoV"
+                            :label "Venta"
+                            :value "V"}
+                           {:id "tipoR"
+                            :label "Renta"
+                            :value "R"}]})
+   (build-field {:label "MODELO"
+                 :type "text"
+                 :id "modelo"
+                 :name "modelo"
+                 :placeholder "modelo aqui..."
+                 :required false
+                 :error " "
+                 :value (:modelo row)})
+   (build-field {:label "RECAMARAS"
+                 :type "number"
+                 :id "recamaras"
+                 :name "recamaras"
+                 :min "1"
+                 :max "9"
+                 :step "1"
+                 :placeholder "recamaras aqui..."
+                 :required false
+                 :error " "
+                 :value (:recamaras row)})
+   (build-field {:label "BAÑOS"
+                 :type "number"
+                 :id "baños"
+                 :name "baños"
+                 :min "1"
+                 :max "6"
+                 :step ".5"
+                 :placeholder "baños aqui..."
+                 :required false
+                 :error " "
+                 :value (:baños row)})
+   (build-field {:label "PLANTAS"
+                 :type "number"
+                 :id "plantas"
+                 :name "plantas"
+                 :min "1"
+                 :max "20"
+                 :step "1"
+                 :placeholder "plantas aqui..."
+                 :required false
+                 :error " "
+                 :value (:plantas row)})
+   (build-field {:label "COSTO"
+                 :type "text"
+                 :id "costo"
+                 :name "costo"
+                 :placeholder "costo aqui..."
+                 :required false
+                 :error " "
+                 :value (:costo row)})
+   (build-field {:label "MTC"
+                 :type "text"
+                 :id "mtc"
+                 :name "mtc"
+                 :placeholder "mtc aqui..."
+                 :required false
+                 :error " "
+                 :value (:mtc row)})
+   (build-field {:label "MTT"
+                 :type "text"
+                 :id "mtt"
+                 :name "mtt"
+                 :placeholder "mtt aqui..."
+                 :required false
+                 :error " "
+                 :value (:mtt row)})
+   (build-textarea {:label "COMENTARIOS"
+                    :id "comentarios"
+                    :name "comentarios"
+                    :rows "3"
+                    :placeholder "comentarios aqui..."
+                    :required false
+                    :error " "
+                    :value (:comentarios row)})))
 
-(defn casas-scripts []
+(defn build-casas-form
+  [title row]
+  (let [fields (build-casas-fields row)
+        href "/admin/casas/save"
+        buttons (build-modal-buttons)]
+    (form href fields buttons)))
+
+(defn build-casas-modal
+  [title row]
+  (build-modal title row (build-casas-form title row)))
+
+(defn casas-edit-view
+  [title row rows]
   (list
-   (include-js "/js/grid.js")
-   [:script
-    "
-   function get_fraccionamiento(val,row,index) {
-    var result = null;
-    var scriptUrl = '/table_ref/get-item/fraccionamientos/nombre/id/' + val;
-    $.ajax({
-      url:scriptUrl,
-      type:'get',
-      dataType:'html',
-      async:false,
-      success:function(data) {
-        result = data;
-      }
-    });
-    return result
-   }
-   "]))
+   (casas-view "casas Mantenimiento" rows)
+   (build-casas-modal title row)))
+
+(defn casas-add-view
+  [title row rows]
+  (list
+   (casas-view "casas Mantenimiento" rows)
+   (build-casas-modal title row)))
+
+(defn casas-modal-script
+  []
+  (modal-script))

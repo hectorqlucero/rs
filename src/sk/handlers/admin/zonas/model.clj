@@ -1,8 +1,26 @@
 (ns sk.handlers.admin.zonas.model
-  (:require [sk.models.crud :refer [Query db]]))
+  (:require [sk.models.crud :refer [Query db]]
+            [clojure.string :as st]))
 
-(defn get-rows [tabla]
-  (Query db [(str "select * from " tabla)]))
+(def get-zonas-sql
+  (str
+   "
+SELECT *
+FROM zonas
+"))
 
-(comment
-  (get-rows "zonas"))
+(defn get-zonas
+  []
+  (Query db get-zonas-sql))
+
+(def get-zonas-id-sql
+  (str
+   "
+SELECT *
+FROM zonas
+WHERE id = ?
+"))
+
+(defn get-zonas-id
+  [id]
+  (first (Query db [get-zonas-id-sql id])))

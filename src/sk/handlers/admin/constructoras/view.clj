@@ -1,88 +1,95 @@
 (ns sk.handlers.admin.constructoras.view
-  (:require
-   [hiccup.page :refer [include-js]]
-   [ring.util.anti-forgery :refer [anti-forgery-field]]
-   [sk.models.util :refer
-    [build-dialog build-dialog-buttons build-field build-table build-toolbar]]))
+  (:require [ring.util.anti-forgery :refer [anti-forgery-field]]
+            [sk.models.form :refer [form build-hidden-field build-field build-select build-radio build-modal-buttons build-textarea]]
+            [sk.models.grid :refer [build-grid build-modal modal-script]]))
 
-(defn dialog-fields []
+(defn constructoras-view
+  [title rows]
+  (let [labels ["RAZON SOCIAL" "RFC" "TELEFONO" "CELULAR" "FAX" "EMAIL"]
+        db-fields [:razon_social :rfc :telefono :celular :fax :email]
+        fields (zipmap db-fields labels)
+        table-id "constructoras_table"
+        href "/admin/constructoras"]
+    (build-grid title rows table-id fields href)))
+
+(defn build-constructoras-fields
+  [row]
   (list
-   (build-field
-    {:id "id"
-     :name "id"
-     :type "hidden"})
-   (build-field
-    {:id "razon_social"
-     :name "razon_social"
-     :class "easyui-textbox"
-     :prompt "Razon Social del negocio..."
-     :data-options "label:'Razon Social:',
-        labelPosition:'top',
-        required:true,
-        width:'100%'"})
-   (build-field
-    {:id "rfc"
-     :name "rfc"
-     :class "easyui-textbox"
-     :prompt "RFC del negocio"
-     :data-options "label:'RFC:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "telefono"
-     :name "telefono"
-     :class "easyui-textbox"
-     :prompt "Telefono del negocio..."
-     :data-options "label:'Telefono:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "celular"
-     :name "celular"
-     :class "easyui-textbox"
-     :prompt "Celular del negocio..."
-     :data-options "label:'Celular:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "fax"
-     :name "fax"
-     :class "easyui-textbox"
-     :prompt "Fax del negocio..."
-     :data-options "label:'Fax:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})
-   (build-field
-    {:id "email"
-     :name "email"
-     :class "easyui-textbox"
-     :prompt "Email del negocio..."
-     :data-options "label:'Email:',
-        labelPosition:'top',
-        required:false,
-        width:'100%'"})))
+   (build-hidden-field {:id "id"
+                        :name "id"
+                        :value (:id row)})
+   (build-field {:label "RAZON SOCIAL"
+                 :type "text"
+                 :id "razon_social"
+                 :name "razon_social"
+                 :placeholder "razon_social aqui..."
+                 :required false
+                 :error " "
+                 :value (:razon_social row)})
+   (build-field {:label "RFC"
+                 :type "text"
+                 :id "rfc"
+                 :name "rfc"
+                 :placeholder "rfc aqui..."
+                 :required false
+                 :error " "
+                 :value (:rfc row)})
+   (build-field {:label "TELEFONO"
+                 :type "text"
+                 :id "telefono"
+                 :name "telefono"
+                 :placeholder "telefono aqui..."
+                 :required false
+                 :error " "
+                 :value (:telefono row)})
+   (build-field {:label "CELULAR"
+                 :type "text"
+                 :id "celular"
+                 :name "celular"
+                 :placeholder "celular aqui..."
+                 :required false
+                 :error " "
+                 :value (:celular row)})
+   (build-field {:label "FAX"
+                 :type "text"
+                 :id "fax"
+                 :name "fax"
+                 :placeholder "fax aqui..."
+                 :required false
+                 :error " "
+                 :value (:fax row)})
+   (build-field {:label "EMAIL"
+                 :type "text"
+                 :id "email"
+                 :name "email"
+                 :placeholder "email aqui..."
+                 :required false
+                 :error " "
+                 :value (:email row)})))
 
-(defn constructoras-view [title]
+(defn build-constructoras-form
+  [title row]
+  (let [fields (build-constructoras-fields row)
+        href "/admin/constructoras/save"
+        buttons (build-modal-buttons)]
+    (form href fields buttons)))
+
+(defn build-constructoras-modal
+  [title row]
+  (build-modal title row (build-constructoras-form title row)))
+
+(defn constructoras-edit-view
+  [title row rows]
   (list
-   (anti-forgery-field)
-   (build-table
-    title
-    "/admin/constructoras"
-    (list
-     [:th {:data-options "field:'id',sortable:true,width:100"} "ID"]
-     [:th {:data-options "field:'razon_social',sortable:true,width:100"} "RAZON_SOCIAL"]
-     [:th {:data-options "field:'rfc',sortable:true,width:100"} "RFC"]
-     [:th {:data-options "field:'telefono',sortable:true,width:100"} "TELEFONO"]
-     [:th {:data-options "field:'celular',sortable:true,width:100"} "CELULAR"]
-     [:th {:data-options "field:'fax',sortable:true,width:100"} "FAX"]
-     [:th {:data-options "field:'email',sortable:true,width:100"} "EMAIL"]))
-   (build-toolbar)
-   (build-dialog title (dialog-fields))
-   (build-dialog-buttons)))
+   (constructoras-view "constructoras Manteniento" rows)
+   (build-constructoras-modal title row)))
 
-(defn constructoras-scripts []
-  (include-js "/js/grid.js"))
+(defn constructoras-add-view
+  [title row rows]
+  (list
+   (constructoras-view "constructoras Mantenimiento" rows)
+   (build-constructoras-modal title row)))
+
+(defn constructoras-modal-script
+  []
+  (modal-script))

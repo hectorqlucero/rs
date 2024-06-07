@@ -1,92 +1,132 @@
 (ns sk.models.grid
-  (:require [cheshire.core :refer [generate-string]]
-            [clojure.string :as string]
-            [sk.models.crud :refer [build-grid-columns db Query]]
-            [sk.models.util :refer [parse-int]]))
+  (:require [clojure.string :as st]
+            [ring.util.anti-forgery :refer [anti-forgery-field]]))
 
-(defn convert-search-columns [fields]
-  (let [fields (map #(str "COALESCE(" % ",'')") fields)]
-    (into [] fields)))
+;; start build-gid
+(defn build-grid-head
+  [href fields & args]
+  (let [args (first args)
+        new (:new args)]
+    (list
+     [:thead
+      [:tr
+       (map (fn [field]
+              (list
+               [:th {:data-sortable "true"
+                     :data-field (key field)} (st/upper-case (val field))]))
 
-(defn grid-sort
-  "Creates sorting criteria (ORDER BY) for easyui grid"
-  [order-column order-dir]
-  (if (not (nil? order-column)) (str " ORDER BY " order-column " " order-dir) nil))
+            fields)
+       [:th.text-center [:a.btn.btn-primary {:role "button"
+                                             :class (str "btn btn-primary" (when (= new false) " disabled"))
+                                             :href (str href "/add")} "Nuevo Record"]]]])))
 
-(defn grid-sort-extra [order extra]
-  (if (nil? order) (str " ORDER BY " extra) order))
-
-(defn grid-search-extra [search extra]
-  (when-not (string/blank? extra)
-    (if (nil? search)
-      (str " WHERE " extra)
-      (str search " AND " extra))))
-
-(defn grid-search
-  "Creates search criteria for easyui grid (LIKE search) on all columns"
-  [search fields]
-  (if (not (string/blank? search))
-    (str " WHERE LOWER(concat(" (apply str (interpose "," fields)) ")) like lower('%" search "%')") nil))
-
-(defn grid-add-search
-  "Creates search criteria for easyui grid (LIKE search) on all columns"
-  [search fields]
-  (if (not (string/blank? search))
-    (str " concat(" (apply str (interpose "," fields)) ") like lower('%" search "%')") nil))
-
-(defn grid-offset
-  "Creates the limit and offset for pagination on easyui grids (LIMIT && OFFSET)"
-  [limit page]
-  (when (and (parse-int limit)
-             (parse-int page))
-    (let [offset (* (dec page) limit)]
-      (str " LIMIT " limit " OFFSET " offset))))
-
-(defn grid-total_sql
-  "Create a total of the grid criteria"
-  [table aliases join search order]
-  (str "SELECT " (apply str (interpose "," aliases)) " FROM " table " " join search order))
-
-(defn grid-sql
-  "Creates select statement for easyui grid (SELECT)"
-  [table aliases join search order offset]
-  (str "SELECT " (apply str (interpose "," aliases)) " FROM " table " " join search order offset))
-
-(defn grid-rows
-  "Creates the row object to return to the grids"
-  [table aliases join search order offset]
-  {:total (count (Query db [(grid-total_sql table aliases join search order)]))
-   :rows  (Query db [(grid-sql table aliases join search order offset)])})
-
-;; Start build grid
-(defn get-search-extra
-  [search args]
-  (try
-    (let [search-extra (:search-extra (first args))]
-      (when-not (nil? search-extra)
-        (grid-search-extra search search-extra)))
-    (catch Exception e (.getMessage e))))
-
-(defn get-sort-extra
-  [order args]
-  (try
-    (let [sort-extra (:sort-extra (first args))]
-      (when-not (nil? sort-extra)
-        (grid-sort-extra order sort-extra)))
-    (catch Exception e (.getMessage e))))
+(defn build-grid-body
+  [rows href fields & args]
+  (let [args (first args)
+        edit (:edit args)
+        delete (:delete args)]
+    (list
+     [:tbody
+      (map (partial (fn [row]
+                      [:tr
+                       (map (fn [field]
+                              [:td ((key field) row)]) fields)
+                       [:td.text-nowrap.text-center {:style "width:15%;"}
+                        [:a {:role "button"
+                             :class (str "btn btn-primary" (when (= edit false) " disabled"))
+                             :style "margin:1px;"
+                             :href (str href "/edit/" (:id row))} "Editar"]
+                        [:a {:role "button"
+                             :class (str "confirm btn btn-danger" (when (= delete false) " disabled"))
+                             :style "margin:1px;"
+                             :href (str href "/delete/" (:id row))} "Borrar"]]])) rows)])))
 
 (defn build-grid
-  "builds grid. Parameters: params, table Args: map with one or more, :sort-extra, :search-extra, :join, ex. {:sort-extra 'firstname,lastname'}"
-  [params table & args]
-  (try
-    (let [aliases (build-grid-columns table)
-          join    (:join args)
-          search  nil
-          search  (get-search-extra search args)
-          order   (grid-sort (:sort params nil) (:order params nil))
-          order   (get-sort-extra order args)
-          offset  (grid-offset (parse-int (:rows params)) (parse-int (:page params)))
-          rows    (grid-rows table aliases join search order offset)]
-      (generate-string rows))
-    (catch Exception e (.getMessge e))))
+  [title rows table-id fields href & args]
+  (list
+   [:div.table-responsive
+    [:table.table.table-sm {:id table-id
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-toggle "true"
+                            :data-show-print "false"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     (if (seq args)
+       (build-grid-head href fields (first args))
+       (build-grid-head href fields))
+     (if (seq args)
+       (build-grid-body rows href fields (first args))
+       (build-grid-body rows href fields))]]))
 ;; End build-grid
+
+;; start build-dashboard
+(defn build-dashboard-head
+  [fields]
+  (list
+   [:thead
+    [:tr
+     (map (fn [field]
+            (list
+             [:th {:data-sortable "true"
+                   :data-field (key field)} (st/upper-case (val field))]))
+
+          fields)]]))
+
+(defn build-dashboard-body
+  [rows fields]
+  (list
+   [:tbody
+    (map (partial (fn [row]
+                    [:tr
+                     (map (fn [field]
+                            [:td ((key field) row)]) fields)])) rows)]))
+
+(defn build-dashboard
+  [title rows table-id fields]
+  (list
+   [:div.table-responsive
+    [:table.table.table-sm {:id table-id
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-toggle "true"
+                            :data-show-print "true"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     (build-dashboard-head fields)
+     (build-dashboard-body rows fields)]]))
+;; End build-dashboard
+
+;; Start build-modal
+(defn build-modal
+  [title row form]
+  (list
+   [:div.modal.fade {:id "myModal"
+                     :tabindex "-1"
+                     :role "dialog"
+                     :aria-labelledby "myModatlTitle"
+                     :aria-hidden "true"}
+    [:div.modal-dialog {:role "document"}
+     [:div.modal-content
+      [:div.modal-header
+       [:h5.modal-title {:id "myModalTitle"} title]
+       [:button.close {:type "button"
+                       :data-dismiss "modal"
+                       :aria-label "Close"}
+        [:span {:aria-hidden "true"} "&times;"]]]
+      [:div.modal-body
+       [:span form]]]]]))
+
+(defn modal-script
+  []
+  [:script
+   "
+   $('#myModal').modal('show');
+   "])
+;; End build-modal
