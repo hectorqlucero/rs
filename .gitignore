@@ -14,5 +14,6 @@ pom.xml.asc
 *.lsp/*
 /.lein-*
 /.nrepl-port
+/.prepl-port
 .hgignore
 .hg/

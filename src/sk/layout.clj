@@ -11,12 +11,12 @@
           (= (user-level) "A")
           (= (user-level) "S"))
      (list
-      [:a.dropdown-item {:href "/admin/constructoras"} "Constructoras"]
-      [:a.dropdown-item {:href "/admin/tipo_creditos"} "Tipo de Creditos"]
-      [:a.dropdown-item {:href "/admin/zonas"} "Zonas"]
-      [:a.dropdown-item {:href "/admin/fraccionamientos"} "Fraccionamientos"]
-      [:a.dropdown-item {:href "/admin/casas"} "Casas"]
-      [:a.dropdown-item {:href "/admin/clientes"} "Clientes"]
+      [:li [:a.dropdown-item {:href "/admin/constructoras"} "Constructoras"]]
+      [:li [:a.dropdown-item {:href "/admin/tipo_creditos"} "Tipo de Creditos"]]
+      [:li [:a.dropdown-item {:href "/admin/zonas"} "Zonas"]]
+      [:li [:a.dropdown-item {:href "/admin/fraccionamientos"} "Fraccionamientos"]]
+      [:li [:a.dropdown-item {:href "/admin/casas"} "Casas"]]
+      [:li [:a.dropdown-item {:href "/admin/clientes"} "Clientes"]]
       (when (= (user-level) "S")
         [:li [:a.dropdown-item {:href "/admin/users"} "Usuarios"]])))))
 
@@ -34,7 +34,8 @@
     [:div#collapsibleNavbar.collapse.navbar-collapse
      [:ul.navbar-nav
       [:li.nav-item [:a.nav-link {:href "/clientes"} "Clientes"]]
-      [:li.nav-item [:a.nav-link {:href "/clientes_activos"} "Clientes Activos"]]
+      [:li.nav-item [:a.nav-link {:href "/renta"} "Clientes - Renta"]]
+      [:li.nav-item [:a.nav-link {:href "/clientes_activos"} "Clientes - Venta"]]
       (when
        (or
         (= (user-level) "U")
@@ -43,7 +44,7 @@
         [:li.nav-item.dropdown
          [:a.nav-link.dropdown-toggle {:href "#"
                                        :id "navdrop"
-                                       :data-toggle "dropdown"} "Administrar"]
+                                       :data-bs-toggle "dropdown"} "Administrar"]
          [:ul.dropdown-menu {:aria-labelledby "navdrop"}
           (build-admin)]])
       [:li.nav-item [:a.nav-link {:href "/home/logoff"} (str "Salir [" (user-name) "]")]]]]]))
@@ -90,7 +91,6 @@
 (defn app-js []
   (list
    (include-js "/js/jquery.min.js")
-   (include-js "/bootstrap-4.0.0/dist/js/bootstrap.bundle.min.js")
    (include-js "/bootstrap5/js/bootstrap.bundle.min.js")
    (include-js "/bootstrap-table-master/dist/bootstrap-table.min.js")
    (include-js "/bootstrap-table-master/dist/extensions/print/bootstrap-table-print.min.js")

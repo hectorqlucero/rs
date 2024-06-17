@@ -2,10 +2,55 @@
   (:require [sk.models.grid :refer [build-dashboard
                                     build-modal
                                     modal-script]]
-            [sk.handlers.clientes.model :refer [get-casas
-                                                get-clientes
-                                                get-available-clientes
-                                                get-row]]))
+            [sk.handlers.clientes.model :refer [casas-renta
+                                                casas-venta
+                                                clientes-venta]]))
+
+(defn renta-view
+  [title rows]
+  (list
+   [:div.table-responsive
+    [:table.table.table-sm {:id "renta_table"
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-print "true"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     [:thead
+      [:tr
+       [:th {:data-sortable "true"
+             :data-field ":nombre_completo"} "NOMBRE"]
+       [:th {:data-sortable "true"
+             :data-field ":celular"} "CELULAR"]
+       [:th {:data-sortable "true"
+             :data-field ":email"} "EMAIL"]
+       [:th {:data-sortable "true"
+             :data-field ":ingresos_formatted"} "INGRESOS"]
+       [:th {:data-sortable "true"
+             :data-field ":pc_formatted"} "PC"]
+       [:th {:data-sortable "true"
+             :data-field ":tipo_creditos_id_formatted"} "TIPO DE CREDITO"]
+       [:th {:data-sortable "true"
+             :data-field ":tipo_formatted"} "TIPO"]
+       [:th.text-nowrap.text-center {:data-sortable "false"
+                                     :style "width:15%;"} "DETALLES"]]]
+
+     (map (fn [row]
+            [:tr
+             [:td (:nombre_completo row)]
+             [:td (:celular row)]
+             [:td (:email row)]
+             [:td (:ingresos_formatted row)]
+             [:td (:pc_formatted row)]
+             [:td (:tipo_creditos_id_formatted row)]
+             [:td (:tipo_formatted row)]
+             [:td.text-nowrap.text-center {:style "width:15%;"}
+              [:a.btn.btn-primary {:role "button"
+                                   :style "margin:1px;"
+                                   :href (str "/renta/casas/" (:id row))} "Detalles"]]]) rows)]]))
 
 (defn clientes-view
   [title rows]
@@ -77,7 +122,7 @@
        [:th {:data-sortable "true"
              :data-field ":tipo_creditos"} "TIPO DE CREDITO"]
        [:th {:data-sortable "true"
-             :data-field ":tipo_formatted"} "TIPO"]
+             :data-field ":tipo_creditos_id_formatted"} "TIPO"]
        [:th.text-nowrap.text-center {:data-sortable "false"
                                      :style "width:15%;"} "DETALLES"]]]
      [:tbody
@@ -88,8 +133,8 @@
               [:td (:email row)]
               [:td (:ingresos_formatted row)]
               [:td (:pc_formatted row)]
-              [:td (:tipo_creditos row)]
-              [:td (:tipo_formatted row)]
+              [:td (:tipo_creditos_id_formatted row)]
+              [:td (:tipo row)]
               [:td.text-nowrap.text-center {:style "width:15%;"}
                [:a.btn.btn-primary {:role "button"
                                     :style "margin:1px;"
@@ -141,21 +186,26 @@
     (map build-house-body crows)
     [:div.card-footer
      [:button.btn.btn-primary {:type "button"
-                               :data-dismiss "modal"
+                               :data-bs-dismiss "modal"
                                :aria-label "Close"
                                :value "Regresar"} "Regresar"]]]))
 
 (defn casas-view
   [title clientes-id row rows]
-  (let [crows (get-casas clientes-id)
+  (let [crows (casas-venta clientes-id)
         title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)]
     (list
      (clientes-activos-view title rows)
      (build-modal title {} (build-house title crows)))))
 
+(defn renta-casas-view
+  [title clientes-id row rows]
+  (let [crows (casas-renta clientes-id)
+        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)]
+    (list
+     (renta-view title rows)
+     (build-modal title {} (build-house title crows)))))
+
 (defn casas-view-script
   []
   (modal-script))
-
-(comment
-  (casas-view "testing" 4 (first (get-row 4)) (get-available-clientes)))

@@ -1,6 +1,6 @@
 (defproject sk "0.1.0"
-  :description "Demo" ; Change me
-  :url "http://example.com/FIXME" ; Change me
+  :description "RS" ; Change me
+  :url "https://github.com/SymphonyX83/rs" ; Change me
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.11.1"]
@@ -26,7 +26,7 @@
   :aot [sk.core]
   :plugins [[lein-ancient "0.7.0"]
             [lein-pprint "1.3.2"]]
-  :uberjar-name "demo.jar" ; Change me
+  :uberjar-name "rs.jar" ; Change me
   :target-path "target/%s"
   :ring {:handler sk.core
          :auto-reload? true

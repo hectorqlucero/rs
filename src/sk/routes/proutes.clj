@@ -23,6 +23,8 @@
   (GET "/admin/clientes/delete/:id" [id] (clientes-controller/clientes-delete id))
   (GET "/clientes" params [] (clientes-dashboard/clientes params))
   (GET "/clientes_activos" params [] (clientes-dashboard/clientes-activos params))
+  (GET "/renta" params [] (clientes-dashboard/renta params))
+  (GET "/renta/casas/:id" [id] (clientes-dashboard/renta-casas id))
   (GET "/clientes/get_casas/:id" [id] (clientes-dashboard/get-casas id))
 
   (GET "/admin/constructoras" params constructoras-controller/constructoras)
