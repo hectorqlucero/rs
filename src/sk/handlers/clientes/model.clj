@@ -62,12 +62,12 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
 
 ;; Start min renta-venta
 (defn casas-renta-min []
-  (-> (Query db "select costo from casas where costo > 0 and tipo = 'R' order by costo limit 1")
+  (-> (Query db "select costo from casas where costo > 0 and tipo = 'R' and status = 'A' order by costo limit 1")
       first
       :costo))
 
 (defn casas-venta-min []
-  (-> (Query db "select costo from casas where costo > 0 and tipo = 'V' order by costo limit 1")
+  (-> (Query db "select costo from casas where costo > 0 and tipo = 'V' and status = 'A' order by costo limit 1")
       first
       :costo))
 ;; End min renta-venta
@@ -125,6 +125,7 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
   where
   casas.costo <= ?
   and casas.tipo = 'R'
+  and casas.status = 'A'
   ")
 
 (defn casas-renta
@@ -194,6 +195,7 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
     OR f.tipo_creditos_id = 4)
     AND c.costo <= " (:pc crow) "
     AND c.tipo = \"" (:tipo crow) \" "
+    AND c.status = 'A'
     ORDER BY
     f.estado,
     f.ciudad,

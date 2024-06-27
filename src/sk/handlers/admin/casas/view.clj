@@ -105,7 +105,19 @@
                     :placeholder "comentarios aqui..."
                     :required false
                     :error " "
-                    :value (:comentarios row)})))
+                    :value (:comentarios row)})
+   (build-radio {:label "STATUS"
+                 :name "status"
+                 :value (:status row)
+                 :options [{:id "statusA"
+                            :label "Activo"
+                            :value "A"}
+                           {:id "statusP"
+                            :label "En Proceso"
+                            :value "P"}
+                           {:id  "statusI"
+                            :label "Inactivo"
+                            :value "I"}]})))
 
 (defn build-casas-form
   [title row]
