@@ -150,8 +150,10 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
   (let [row (-> (Query db ["select pc from clientes where id = ?" cliente-id])
                 first)
         pc (:pc row)
-        status "A"]
-    (Query db [casas-renta-sql pc status])))
+        status "A"
+        result (Query db [casas-renta-sql pc status])
+        rows (map #(assoc % :cliente_id cliente-id) result)]
+    rows))
 ;; End casas-renta
 
 ;; Start casas-renta-proceso
@@ -206,6 +208,7 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
    "
     SELECT
     f.id,
+    c.id as casa_id,
     s.razon_social,
     f.nombre,
     f.estado,
@@ -238,8 +241,10 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
 (defn casas-venta
   [cliente-id]
   (let [status "A"
-        crow (get-row cliente-id)]
-    (Query db (casas-venta-sql crow status))))
+        crow (get-row cliente-id)
+        result (Query db (casas-venta-sql crow status))
+        rows (map #(assoc % :cliente_id cliente-id) result)]
+    rows))
 ;; End casas-venta
 
 ;; Start casas-venta-proceso

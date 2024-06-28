@@ -140,8 +140,20 @@
                                     :style "margin:1px;"
                                     :href (str "/clientes/get_casas/" (:id row))} "Casas"]]]) rows)]]]))
 
+(defn renta-proceso-button [row]
+  (let [clientes-id (:cliente_id row)
+        casas-id (:id row)]
+    [:div.col.col-auto [:a.btn.btn-secondary {:role "button"
+                                              :href (str "/proceso/renta/" clientes-id "/" casas-id)} " Agregar a Proceso"]]))
+
+(defn venta-proceso-button [row]
+  (let [clientes-id (:cliente_id row)
+        casas-id (:casa_id row)]
+    [:div.col.col-auto [:a.btn.btn-secondary {:role "button"
+                                              :href (str "/proceso/venta/" clientes-id "/" casas-id)} "Agregar a Proceso"]]))
+
 (defn build-house-body
-  [row]
+  [hbuttons row]
   (list
    [:div.card-body
     [:div.row
@@ -176,14 +188,17 @@
      [:div.col.col-auto.text-nowrap (:recamaras row)]]
     [:div.row
      [:div.col.col-auto [:span.fw-bold.text-nowrap "Baños:"]]
-     [:div.col.col-auto.text-nowrap (:baños row)]]]))
+     [:div.col.col-auto.text-nowrap (:baños row)]]
+    [:div.row (if (= 1 hbuttons)
+                (renta-proceso-button row)
+                (venta-proceso-button row))]]))
 
 (defn build-house
-  [title crows]
+  [title crows hbuttons]
   (list
    [:div.card
     [:div.card-header title]
-    (map build-house-body crows)
+    (map (partial build-house-body hbuttons) crows)
     [:div.card-footer
      [:button.btn.btn-primary {:type "button"
                                :data-bs-dismiss "modal"
@@ -193,18 +208,20 @@
 (defn casas-view
   [title clientes-id row rows]
   (let [crows (casas-venta clientes-id)
-        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)]
+        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)
+        hbuttons 2]
     (list
      (clientes-activos-view title rows)
-     (build-modal title {} (build-house title crows)))))
+     (build-modal title {} (build-house title crows hbuttons)))))
 
 (defn renta-casas-view
   [title clientes-id row rows]
   (let [crows (casas-renta clientes-id)
-        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)]
+        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)
+        hbuttons 1]
     (list
      (renta-view title rows)
-     (build-modal title {} (build-house title crows)))))
+     (build-modal title {} (build-house title crows hbuttons)))))
 
 (defn casas-view-script
   []
