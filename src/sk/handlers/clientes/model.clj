@@ -72,6 +72,18 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
       :costo))
 ;; End min renta-venta
 
+;; Start min renta-venta-proceso
+(defn casas-renta-min-proceso []
+  (-> (Query db "select costo from casas where costo > 0 and tipo = 'R' and status = 'P' order by costo limit 1")
+      first
+      :costo))
+
+(defn casas-venta-min-proceso []
+  (-> (Query db "select costo from casas where costo > 0 and tipo = 'V' and status = 'P' order by costo limit 1")
+      first
+      :costo))
+;; End min renta-venta-proceso
+
 ;; Start clientes-renta
 (def clientes-renta-sql
   "
@@ -101,6 +113,11 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
   []
   (let [min-renta (casas-renta-min)]
     (Query db [clientes-renta-sql min-renta])))
+
+(defn clientes-renta-proceso
+  []
+  (let [min-renta (casas-renta-min-proceso)]
+    (Query db [clientes-renta-sql min-renta])))
 ;; End clientes-renta
 
 ;; Start casas-renta
@@ -125,16 +142,27 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
   where
   casas.costo <= ?
   and casas.tipo = 'R'
-  and casas.status = 'A'
+  and casas.status = ?
   ")
 
 (defn casas-renta
   [cliente-id]
   (let [row (-> (Query db ["select pc from clientes where id = ?" cliente-id])
                 first)
-        pc (:pc row)]
-    (Query db [casas-renta-sql pc])))
+        pc (:pc row)
+        status "A"]
+    (Query db [casas-renta-sql pc status])))
 ;; End casas-renta
+
+;; Start casas-renta-proceso
+(defn casas-renta-proceso
+  [cliente-id]
+  (let [row (-> (Query db ["select pc from clientes where id = ?" cliente-id])
+                first)
+        pc (:pc row)
+        status "P"]
+    (Query db [casas-renta-sql pc status])))
+;; End casas-renta-proceso
 
 ;; Start clientes-venta
 (def clientes-venta-sql
@@ -165,10 +193,15 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
   []
   (let [min-venta (casas-venta-min)]
     (Query db [clientes-venta-sql min-venta])))
+
+(defn clientes-venta-proceso
+  []
+  (let [min-venta (casas-venta-min-proceso)]
+    (Query db [clientes-venta-sql min-venta])))
 ;; End clientes-venta
 
 ;; Start casas-venta
-(defn casas-venta-sql [crow]
+(defn casas-venta-sql [crow status]
   (str
    "
     SELECT
@@ -195,7 +228,7 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
     OR f.tipo_creditos_id = 4)
     AND c.costo <= " (:pc crow) "
     AND c.tipo = \"" (:tipo crow) \" "
-    AND c.status = 'A'
+    AND c.status = \"" status \" "
     ORDER BY
     f.estado,
     f.ciudad,
@@ -204,11 +237,28 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
 
 (defn casas-venta
   [cliente-id]
-  (let [crow (get-row cliente-id)]
-    (Query db (casas-venta-sql crow))))
+  (let [status "A"
+        crow (get-row cliente-id)]
+    (Query db (casas-venta-sql crow status))))
 ;; End casas-venta
 
+;; Start casas-venta-proceso
+(defn casas-venta-proceso
+  [cliente-id]
+  (let [status "P"
+        crow (get-row cliente-id)]
+    (Query db (casas-venta-sql crow status))))
+;; End casas-venta-proceso
+
 (comment
+  (casas-venta-proceso 17)
+  (casas-venta-min-proceso)
+  (clientes-venta-proceso)
+
+  (casas-renta-proceso 26)
+  (casas-renta-min-proceso)
+  (clientes-renta-proceso)
+
   (get-row 17)
   (casas-venta 17)
   (casas-venta-min)

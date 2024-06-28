@@ -20,6 +20,7 @@
         content (clientes-view title rows)]
     (application title ok js content)))
 
+;; Start renta
 (defn renta [_]
   (let [title "Clientes - Renta"
         ok (get-session-id)
@@ -36,7 +37,9 @@
         rows (clientes-renta)
         content (renta-casas-view title clientes_id row rows)]
     (application title ok js content)))
+;; End renta
 
+;; Start venta
 (defn clientes-activos [_]
   (let [title "Clientes"
         ok (get-session-id)
@@ -53,6 +56,7 @@
         rows (clientes-venta)
         content (casas-view title clientes_id row rows)]
     (application title ok js content)))
+;; End venta
 
 (comment
   (casas-view "testing" 4 (get-clientes)))

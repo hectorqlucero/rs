@@ -34,8 +34,10 @@
     [:div#collapsibleNavbar.collapse.navbar-collapse
      [:ul.navbar-nav
       [:li.nav-item [:a.nav-link {:href "/clientes"} "Clientes"]]
-      [:li.nav-item [:a.nav-link {:href "/renta"} "Clientes - Renta"]]
-      [:li.nav-item [:a.nav-link {:href "/clientes_activos"} "Clientes - Venta"]]
+      [:li.nav-item [:a.nav-link {:href "/renta"} "Renta"]]
+      [:li.nav-item [:a.nav-link {:href "/renta/proceso"} "P-Renta"]]
+      [:li.nav-item [:a.nav-link {:href "/clientes_activos"} "Venta"]]
+      [:li.nav-item [:a.nav-link {:href "/clientes_activos/proceso"} "P-Venta"]]
       (when
        (or
         (= (user-level) "U")

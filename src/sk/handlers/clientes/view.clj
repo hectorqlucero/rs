@@ -36,7 +36,7 @@
        [:th {:data-sortable "true"
              :data-field ":tipo_formatted"} "TIPO"]
        [:th.text-nowrap.text-center {:data-sortable "false"
-                                     :style "width:15%;"} "DETALLES"]]]
+                                     :style "width:15%;"} "CASAS"]]]
 
      (map (fn [row]
             [:tr
@@ -50,7 +50,7 @@
              [:td.text-nowrap.text-center {:style "width:15%;"}
               [:a.btn.btn-primary {:role "button"
                                    :style "margin:1px;"
-                                   :href (str "/renta/casas/" (:id row))} "Detalles"]]]) rows)]]))
+                                   :href (str "/renta/casas/" (:id row))} "Casas"]]]) rows)]]))
 
 (defn clientes-view
   [title rows]
@@ -124,7 +124,7 @@
        [:th {:data-sortable "true"
              :data-field ":tipo_creditos_id_formatted"} "TIPO"]
        [:th.text-nowrap.text-center {:data-sortable "false"
-                                     :style "width:15%;"} "DETALLES"]]]
+                                     :style "width:15%;"} "CASAS"]]]
      [:tbody
       (map (fn [row]
              [:tr
@@ -138,7 +138,7 @@
               [:td.text-nowrap.text-center {:style "width:15%;"}
                [:a.btn.btn-primary {:role "button"
                                     :style "margin:1px;"
-                                    :href (str "/clientes/get_casas/" (:id row))} "Detalles"]]]) rows)]]]))
+                                    :href (str "/clientes/get_casas/" (:id row))} "Casas"]]]) rows)]]]))
 
 (defn build-house-body
   [row]
