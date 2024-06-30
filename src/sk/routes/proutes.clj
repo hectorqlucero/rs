@@ -29,6 +29,8 @@
   (GET "/clientes/get_casas/:id" [id] (clientes-dashboard/get-casas id))
   (GET "/proceso/renta/:cliente_id/:casa_id" [cliente_id casa_id] (clientes-dashboard/proceso-renta cliente_id casa_id))
   (GET "/proceso/venta/:cliente_id/:casa_id" [cliente_id casa_id] (clientes-dashboard/proceso-venta cliente_id casa_id))
+  (GET "/renta/proceso" params [] (clientes-dashboard/renta-proceso params))
+  (GET "/venta/proceso" params [] (clientes-dashboard/venta-proceso params))
 
   (GET "/admin/constructoras" params constructoras-controller/constructoras)
   (GET "/admin/constructoras/edit/:id" [id] (constructoras-controller/constructoras-edit id))

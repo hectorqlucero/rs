@@ -37,7 +37,7 @@
       [:li.nav-item [:a.nav-link {:href "/renta"} "Renta"]]
       [:li.nav-item [:a.nav-link {:href "/renta/proceso"} "P-Renta"]]
       [:li.nav-item [:a.nav-link {:href "/clientes_activos"} "Venta"]]
-      [:li.nav-item [:a.nav-link {:href "/clientes_activos/proceso"} "P-Venta"]]
+      [:li.nav-item [:a.nav-link {:href "/venta/proceso"} "P-Venta"]]
       (when
        (or
         (= (user-level) "U")

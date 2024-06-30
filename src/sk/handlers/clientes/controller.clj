@@ -87,5 +87,13 @@
       (error-404 "Casa transferida a proceso correctamente!" "/clientes_activos")
       (error-404 "No se pudo transferir a proceso!" "/clientes_activos"))))
 
+(defn renta-proceso
+  [_]
+  (println "renta-proceso"))
+
+(defn venta-proceso
+  [_]
+  (println "venta-proceso"))
+
 (comment
   (casas-view "testing" 4 (get-clientes)))
