@@ -21,11 +21,14 @@
   (POST "/admin/clientes/save" params [] (clientes-controller/clientes-save params))
   (GET "/admin/clientes/add" params [] (clientes-controller/clientes-add params))
   (GET "/admin/clientes/delete/:id" [id] (clientes-controller/clientes-delete id))
+
   (GET "/clientes" params [] (clientes-dashboard/clientes params))
   (GET "/clientes_activos" params [] (clientes-dashboard/clientes-activos params))
   (GET "/renta" params [] (clientes-dashboard/renta params))
   (GET "/renta/casas/:id" [id] (clientes-dashboard/renta-casas id))
   (GET "/clientes/get_casas/:id" [id] (clientes-dashboard/get-casas id))
+  (GET "/proceso/renta/:cliente_id/:casa_id" [cliente_id casa_id] (clientes-dashboard/proceso-renta cliente_id casa_id))
+  (GET "/proceso/venta/:cliente_id/:casa_id" [cliente_id casa_id] (clientes-dashboard/proceso-venta cliente_id casa_id))
 
   (GET "/admin/constructoras" params constructoras-controller/constructoras)
   (GET "/admin/constructoras/edit/:id" [id] (constructoras-controller/constructoras-edit id))

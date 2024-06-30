@@ -1,5 +1,6 @@
 (ns sk.handlers.clientes.controller
-  (:require [sk.layout :refer [application]]
+  (:require [sk.layout :refer [application error-404]]
+            [sk.models.crud :refer [db crud-fix-id Insert Update]]
             [sk.models.util :refer [get-session-id]]
             [sk.handlers.clientes.model :refer [get-clientes
                                                 clientes-renta
@@ -57,6 +58,34 @@
         content (casas-view title clientes_id row rows)]
     (application title ok js content)))
 ;; End venta
+
+(defn proceso-renta
+  [cliente-id casa-id]
+  (let [id (crud-fix-id casa-id)
+        crow {:status "P"}
+        cresult (Update db :casas crow ["id = ?" id])
+        prow {:cliente_id cliente-id
+              :casa_id casa-id}
+        result (Insert db :proceso prow)]
+    (if (and
+         (seq cresult)
+         (seq result))
+      (error-404 "Casa transferida a proceso correctamente!" "/renta")
+      (error-404 "No se pudo transferir a proceso!" "/renta"))))
+
+(defn proceso-venta
+  [cliente-id casa-id]
+  (let [id (crud-fix-id casa-id)
+        crow {:status "P"}
+        cresult (Update db :casas crow ["id = ?" id])
+        prow {:cliente_id cliente-id
+              :casa_id casa-id}
+        result (Insert db :proceso prow)]
+    (if (and
+         (seq cresult)
+         (seq result))
+      (error-404 "Casa transferida a proceso correctamente!" "/clientes_activos")
+      (error-404 "No se pudo transferir a proceso!" "/clientes_activos"))))
 
 (comment
   (casas-view "testing" 4 (get-clientes)))

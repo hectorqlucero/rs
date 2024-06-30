@@ -120,9 +120,9 @@
              (> ok 0) (menus-private))
            [:div {:style "padding-left:14px;"} content]]
           (app-js)
-          js]
-         [:footer.bg-light.text-center.fixed-bottom
-          [:span  "Copyright &copy" (t/year (t/now)) " " (:company-name config) " - All Rights Reserved"]]))
+          js
+          [:footer.bg-light.text-center.fixed-bottom
+           [:span  "Copyright &copy" (t/year (t/now)) " " (:company-name config) " - All Rights Reserved"]]]))
 
 (defn error-404 [content return-url]
   (html5 {:ng-app (:site-name config) :lang "es"}
@@ -144,6 +144,6 @@
              [:p [:h3 [:a {:href return-url} "Clic aqui para " [:strong "Continuar"]]]]]]]
 
           (app-js)
-          nil]
-         [:footer.bg-secondary.text-center.fixed-bottom
-          [:span  "Copyright &copy" (t/year (t/now)) " " (:company-name config) " - All Rights Reserved"]]))
+          nil
+          [:footer.bg-secondary.text-center.fixed-bottom
+           [:span  "Copyright &copy" (t/year (t/now)) " " (:company-name config) " - All Rights Reserved"]]]))
