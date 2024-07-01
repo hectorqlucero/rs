@@ -4,7 +4,9 @@
                                     modal-script]]
             [sk.handlers.clientes.model :refer [casas-renta
                                                 casas-venta
-                                                clientes-venta]]))
+                                                clientes-venta
+                                                casas-renta-proceso
+                                                casas-venta-proceso]]))
 
 (defn build-table-head
   []
@@ -212,6 +214,26 @@
     [:div.col.col-auto [:a.btn.btn-secondary {:role "button"
                                               :href (str "/proceso/venta/" clientes-id "/" casas-id)} "Agregar a Proceso"]]))
 
+(defn final-renta-button
+  [row]
+  (let [clientes-id (:cliente_id row)
+        casas-id (:casa_id row)]
+    [:div.col.col-auto
+     [:a.btn.btn-success {:role "button"
+                          :href (str "/final/renta/" casas-id)} "Rentada"]
+     [:a.btn.btn-danger {:role "button"
+                         :href (str "/regresar/renta/" casas-id)} "Regresar"]]))
+
+(defn final-venta-button
+  [row]
+  (let [clientes-id (:cliente_id row)
+        casas-id (:casa_id row)]
+    [:div.col.col-auto
+     [:a.btn.btn-success {:role "button"
+                          :href (str "/final/venta/" casas-id)} "Vendida"]
+     [:a.btn.btn-danger {:role "button"
+                         :href (str "/regresar/venta/" casas-id)} "Regresar"]]))
+
 (defn build-house-body
   [hbuttons row]
   (list
@@ -249,9 +271,11 @@
     [:div.row
      [:div.col.col-auto [:span.fw-bold.text-nowrap "Baños:"]]
      [:div.col.col-auto.text-nowrap (:baños row)]]
-    [:div.row (if (= 1 hbuttons)
-                (renta-proceso-button row)
-                (venta-proceso-button row))]]))
+    [:div.row (cond
+                (= hbuttons 1) (renta-proceso-button row)
+                (= hbuttons 2) (venta-proceso-button row)
+                (= hbuttons 3) (final-renta-button row)
+                (= hbuttons 4) (final-venta-button row))]]))
 
 (defn build-house
   [title crows hbuttons]
@@ -281,6 +305,24 @@
         hbuttons 1]
     (list
      (renta-view title rows)
+     (build-modal title {} (build-house title crows hbuttons)))))
+
+(defn renta-proceso-casas-view
+  [title clientes-id row rows]
+  (let [crows (casas-renta-proceso clientes-id)
+        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)
+        hbuttons 3]
+    (list
+     (renta-proceso-view title rows)
+     (build-modal title {} (build-house title crows hbuttons)))))
+
+(defn venta-proceso-casas-view
+  [title clientes-id row rows]
+  (let [crows (casas-venta-proceso clientes-id)
+        title (str (:nombre row) " " (:paterno row) " " (:materno row) " - " title)
+        hbuttons 4]
+    (list
+     (venta-proceso-view title rows)
      (build-modal title {} (build-house title crows hbuttons)))))
 
 (defn casas-view-script

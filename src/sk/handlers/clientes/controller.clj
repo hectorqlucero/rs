@@ -17,6 +17,8 @@
                                                venta-proceso-view
                                                clientes-activos-view
                                                casas-view
+                                               renta-proceso-casas-view
+                                               venta-proceso-casas-view
                                                casas-view-script]]))
 
 (defn clientes [_]
@@ -104,7 +106,13 @@
 
 (defn renta-proceso-casas
   [cliente-id]
-  (println "cliente-id: " (casas-renta-proceso cliente-id)))
+  (let [title "Clientes - Renta - En proceso"
+        ok (get-session-id)
+        js (casas-view-script)
+        row (get-row cliente-id)
+        rows (clientes-renta-proceso)
+        content (renta-proceso-casas-view title cliente-id row rows)]
+    (application title ok js content)))
 
 (defn venta-proceso
   [_]
@@ -117,7 +125,13 @@
 
 (defn venta-proceso-casas
   [cliente-id]
-  (println "cliente-id: " (casas-venta-proceso cliente-id)))
+  (let [title "Clientes - Renta - En proceso"
+        ok (get-session-id)
+        js (casas-view-script)
+        row (get-row cliente-id)
+        rows (clientes-venta-proceso)
+        content (venta-proceso-casas-view title cliente-id row rows)]
+    (application title ok js content)))
 
 (comment
   (casas-view "testing" 4 (get-clientes)))
