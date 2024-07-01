@@ -72,18 +72,6 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
       :costo))
 ;; End min renta-venta
 
-;; Start min renta-venta-proceso
-(defn casas-renta-min-proceso []
-  (-> (Query db "select costo from casas where costo > 0 and tipo = 'R' and status = 'P' order by costo limit 1")
-      first
-      :costo))
-
-(defn casas-venta-min-proceso []
-  (-> (Query db "select costo from casas where costo > 0 and tipo = 'V' and status = 'P' order by costo limit 1")
-      first
-      :costo))
-;; End min renta-venta-proceso
-
 ;; Start clientes-renta
 (def clientes-renta-sql
   "
@@ -305,11 +293,9 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
 
 (comment
   (casas-venta-proceso 17)
-  (casas-venta-min-proceso)
   (clientes-venta-proceso)
 
   (casas-renta-proceso 26)
-  (casas-renta-min-proceso)
   (clientes-renta-proceso)
 
   (get-row 17)
