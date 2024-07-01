@@ -113,11 +113,6 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
   []
   (let [min-renta (casas-renta-min)]
     (Query db [clientes-renta-sql min-renta])))
-
-(defn clientes-renta-proceso
-  []
-  (let [min-renta (casas-renta-min-proceso)]
-    (Query db [clientes-renta-sql min-renta])))
 ;; End clientes-renta
 
 ;; Start casas-renta
@@ -156,16 +151,6 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
     rows))
 ;; End casas-renta
 
-;; Start casas-renta-proceso
-(defn casas-renta-proceso
-  [cliente-id]
-  (let [row (-> (Query db ["select pc from clientes where id = ?" cliente-id])
-                first)
-        pc (:pc row)
-        status "P"]
-    (Query db [casas-renta-sql pc status])))
-;; End casas-renta-proceso
-
 ;; Start clientes-venta
 (def clientes-venta-sql
   "
@@ -194,11 +179,6 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
 (defn clientes-venta
   []
   (let [min-venta (casas-venta-min)]
-    (Query db [clientes-venta-sql min-venta])))
-
-(defn clientes-venta-proceso
-  []
-  (let [min-venta (casas-venta-min-proceso)]
     (Query db [clientes-venta-sql min-venta])))
 ;; End clientes-venta
 
