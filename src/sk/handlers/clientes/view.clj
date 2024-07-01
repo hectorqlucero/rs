@@ -220,6 +220,7 @@
         casas-id (:casa_id row)]
     [:div.col.col-auto
      [:a.btn.btn-success {:role "button"
+                          :style "margin-right:2px;"
                           :href (str "/final/renta/" casas-id)} "Rentada"]
      [:a.btn.btn-danger {:role "button"
                          :href (str "/regresar/renta/" casas-id)} "Regresar"]]))
@@ -230,6 +231,7 @@
         casas-id (:casa_id row)]
     [:div.col.col-auto
      [:a.btn.btn-success {:role "button"
+                          :style "margin-right:2px;"
                           :href (str "/final/venta/" casas-id)} "Vendida"]
      [:a.btn.btn-danger {:role "button"
                          :href (str "/regresar/venta/" casas-id)} "Regresar"]]))
