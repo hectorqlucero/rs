@@ -247,13 +247,81 @@ ORDER BY clientes.nombre,clientes.paterno,clientes.materno
     rows))
 ;; End casas-venta
 
-;; Start casas-venta-proceso
+;; Start clientes-proceso
+(def clientes-proceso-sql
+  "
+  select
+  proceso.cliente_id,
+  proceso.casa_id,
+  CONCAT(IFNULL(clientes.nombre,''),' ',IFNULL(clientes.paterno,''),' ',IFNULL(clientes.materno,'')) as nombre_completo,
+  clientes.celular,
+  clientes.email,
+  clientes.ingresos,
+  CONCAT('$',format(clientes.ingresos,2)) as ingresos_formatted,
+  clientes.pc,
+  CONCAT('$',format(clientes.pc,2)) as pc_formatted,
+  clientes.tipo_creditos_id,
+  tipo_creditos.nombre as tipo_creditos_id_formatted,
+  clientes.tipo,
+  CASE
+    WHEN clientes.tipo = 'V' THEN 'Venta'
+    WHEN clientes.tipo = 'R' THEN 'Renta'
+  END as tipo_formatted
+  from proceso
+  join clientes on clientes.id = proceso.cliente_id
+  join casas on casas.id = proceso.casa_id
+  join tipo_creditos on tipo_creditos.id = clientes.tipo_creditos_id
+  where casas.tipo = ?
+  order by nombre_completo
+  ")
+
+(defn clientes-renta-proceso
+  []
+  (Query db [clientes-proceso-sql "R"]))
+
+(defn clientes-venta-proceso
+  []
+  (Query db [clientes-proceso-sql "V"]))
+;; End clientes proceso
+
+;; Start casas-proceso
+(def casas-proceso-sql
+  "
+  select
+  proceso.id,
+  casas.fraccionamientos_id,
+  casas.id as casa_id,
+  constructoras.razon_social,
+  fraccionamientos.nombre,
+  fraccionamientos.estado,
+  fraccionamientos.ciudad,
+  zonas.nombre as zona,
+  casas.modelo,
+  casas.recamaras,
+  casas.baños,
+  casas.plantas,
+  casas.mtc,
+  casas.mtt,
+  CONCAT('$',FORMAT(casas.costo,'es_MX')) as costo,
+  casas.comentarios
+  FROM proceso
+  join casas on casas.id = proceso.casa_id
+  join fraccionamientos on fraccionamientos.id = casas.fraccionamientos_id
+  join constructoras on constructoras.id = fraccionamientos.constructoras_id
+  join zonas on zonas.id = fraccionamientos.zonas_id
+  WHERE
+  proceso.cliente_id = ?
+  and casas.tipo = ?
+  ")
+
+(defn casas-renta-proceso
+  [cliente-id]
+  (Query db [casas-proceso-sql cliente-id "R"]))
+
 (defn casas-venta-proceso
   [cliente-id]
-  (let [status "P"
-        crow (get-row cliente-id)]
-    (Query db (casas-venta-sql crow status))))
-;; End casas-venta-proceso
+  (Query db [casas-proceso-sql cliente-id "V"]))
+;; End casas-proceso
 
 (comment
   (casas-venta-proceso 17)

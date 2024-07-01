@@ -4,11 +4,17 @@
             [sk.models.util :refer [get-session-id]]
             [sk.handlers.clientes.model :refer [get-clientes
                                                 clientes-renta
+                                                clientes-renta-proceso
+                                                casas-renta-proceso
+                                                casas-venta-proceso
+                                                clientes-venta-proceso
                                                 clientes-venta
                                                 get-row]]
             [sk.handlers.clientes.view :refer [clientes-view
                                                renta-view
+                                               renta-proceso-view
                                                renta-casas-view
+                                               venta-proceso-view
                                                clientes-activos-view
                                                casas-view
                                                casas-view-script]]))
@@ -89,11 +95,29 @@
 
 (defn renta-proceso
   [_]
-  (println "renta-proceso"))
+  (let [title "Clientes - Renta - En proceso"
+        ok (get-session-id)
+        rows (clientes-renta-proceso)
+        js nil
+        content (renta-proceso-view title rows)]
+    (application title ok js content)))
+
+(defn renta-proceso-casas
+  [cliente-id]
+  (println "cliente-id: " (casas-renta-proceso cliente-id)))
 
 (defn venta-proceso
   [_]
-  (println "venta-proceso"))
+  (let [title "Clientes - Venta - En proceso"
+        ok (get-session-id)
+        rows (clientes-venta-proceso)
+        js nil
+        content (venta-proceso-view title rows)]
+    (application title ok js content)))
+
+(defn venta-proceso-casas
+  [cliente-id]
+  (println "cliente-id: " (casas-venta-proceso cliente-id)))
 
 (comment
   (casas-view "testing" 4 (get-clientes)))

@@ -6,6 +6,28 @@
                                                 casas-venta
                                                 clientes-venta]]))
 
+(defn build-table-head
+  []
+  (list
+   [:thead
+    [:tr
+     [:th {:data-sortable "true"
+           :data-field ":nombre_completo"} "NOMBRE"]
+     [:th {:data-sortable "true"
+           :data-field ":celular"} "CELULAR"]
+     [:th {:data-sortable "true"
+           :data-field ":email"} "EMAIL"]
+     [:th {:data-sortable "true"
+           :data-field ":ingresos_formatted"} "INGRESOS"]
+     [:th {:data-sortable "true"
+           :data-field ":pc_formatted"} "PC"]
+     [:th {:data-sortable "true"
+           :data-field ":tipo_creditos_id_formatted"} "TIPO DE CREDITO"]
+     [:th {:data-sortable "true"
+           :data-field ":tipo_formatted"} "TIPO"]
+     [:th.text-nowrap.text-center {:data-sortable "false"
+                                   :style "width:15%;"} "CASAS"]]]))
+
 (defn renta-view
   [title rows]
   (list
@@ -19,25 +41,7 @@
                             :data-pagination "true"
                             :data-key-events "true"}
      [:caption title]
-     [:thead
-      [:tr
-       [:th {:data-sortable "true"
-             :data-field ":nombre_completo"} "NOMBRE"]
-       [:th {:data-sortable "true"
-             :data-field ":celular"} "CELULAR"]
-       [:th {:data-sortable "true"
-             :data-field ":email"} "EMAIL"]
-       [:th {:data-sortable "true"
-             :data-field ":ingresos_formatted"} "INGRESOS"]
-       [:th {:data-sortable "true"
-             :data-field ":pc_formatted"} "PC"]
-       [:th {:data-sortable "true"
-             :data-field ":tipo_creditos_id_formatted"} "TIPO DE CREDITO"]
-       [:th {:data-sortable "true"
-             :data-field ":tipo_formatted"} "TIPO"]
-       [:th.text-nowrap.text-center {:data-sortable "false"
-                                     :style "width:15%;"} "CASAS"]]]
-
+     (build-table-head)
      (map (fn [row]
             [:tr
              [:td (:nombre_completo row)]
@@ -51,6 +55,62 @@
               [:a.btn.btn-primary {:role "button"
                                    :style "margin:1px;"
                                    :href (str "/renta/casas/" (:id row))} "Casas"]]]) rows)]]))
+
+(defn renta-proceso-view
+  [title rows]
+  (list
+   [:div.table-responsive
+    [:table.table.table-sm {:id "renta_table"
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-print "true"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     (build-table-head)
+     (map (fn [row]
+            [:tr
+             [:td (:nombre_completo row)]
+             [:td (:celular row)]
+             [:td (:email row)]
+             [:td (:ingresos_formatted row)]
+             [:td (:pc_formatted row)]
+             [:td (:tipo_creditos_id_formatted row)]
+             [:td (:tipo_formatted row)]
+             [:td.text-nowrap.text-center {:style "width:15%;"}
+              [:a.btn.btn-primary {:role "button"
+                                   :style "margin:1px;"
+                                   :href (str "/renta/proceso/casas/" (:cliente_id row))} "Casas"]]]) rows)]]))
+
+(defn venta-proceso-view
+  [title rows]
+  (list
+   [:div.table-responsive
+    [:table.table.table-sm {:id "renta_table"
+                            :data-locale "es-MX"
+                            :data-toggle "table"
+                            :data-show-columns "true"
+                            :data-show-print "true"
+                            :data-search "true"
+                            :data-pagination "true"
+                            :data-key-events "true"}
+     [:caption title]
+     (build-table-head)
+     (map (fn [row]
+            [:tr
+             [:td (:nombre_completo row)]
+             [:td (:celular row)]
+             [:td (:email row)]
+             [:td (:ingresos_formatted row)]
+             [:td (:pc_formatted row)]
+             [:td (:tipo_creditos_id_formatted row)]
+             [:td (:tipo_formatted row)]
+             [:td.text-nowrap.text-center {:style "width:15%;"}
+              [:a.btn.btn-primary {:role "button"
+                                   :style "margin:1px;"
+                                   :href (str "/venta/proceso/casas/" (:cliente_id row))} "Casas"]]]) rows)]]))
 
 (defn clientes-view
   [title rows]
