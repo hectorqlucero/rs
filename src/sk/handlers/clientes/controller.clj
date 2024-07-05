@@ -1,6 +1,6 @@
 (ns sk.handlers.clientes.controller
   (:require [sk.layout :refer [application error-404]]
-            [sk.models.crud :refer [db crud-fix-id Insert Update]]
+            [sk.models.crud :refer [db crud-fix-id Insert Update Delete]]
             [sk.models.util :refer [get-session-id]]
             [sk.handlers.clientes.model :refer [get-clientes
                                                 clientes-renta
@@ -132,6 +132,30 @@
         rows (clientes-venta-proceso)
         content (venta-proceso-casas-view title cliente-id row rows)]
     (application title ok js content)))
+
+(defn renta-regresar
+  [casa-id proceso-id]
+  (let [id (crud-fix-id casa-id)
+        crow {:status "A"}
+        result (Update db :casas crow ["id = ?" id])
+        result1 (Delete db :proceso ["id = ?" proceso-id])]
+    (if (and
+         seq result
+         seq result1)
+      (error-404 "Casa se regreso correctamente!" "/renta")
+      (error-404 "Hubo errores, la casa no se pudo regresar" "/renta"))))
+
+(defn venta-regresar
+  [casa-id proceso-id]
+  (let [id (crud-fix-id casa-id)
+        crow {:status "A"}
+        result (Update db :casas crow ["id = ?" id])
+        result1 (Delete db :proceso ["id = ?" proceso-id])]
+    (if (and
+         seq result
+         seq result1)
+      (error-404 "Casa se regreso correctamente!" "/venta")
+      (error-404 "Hubo errores, la casa no se pudo regresar" "/venta"))))
 
 (comment
   (casas-view "testing" 4 (get-clientes)))

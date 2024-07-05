@@ -217,24 +217,26 @@
 (defn final-renta-button
   [row]
   (let [clientes-id (:cliente_id row)
-        casas-id (:casa_id row)]
+        casas-id (:casa_id row)
+        proceso-id (:id row)]
     [:div.col.col-auto
      [:a.btn.btn-success {:role "button"
                           :style "margin-right:2px;"
-                          :href (str "/final/renta/" casas-id)} "Rentada"]
+                          :href (str "/final/renta/" casas-id "/" proceso-id)} "Rentada"]
      [:a.btn.btn-danger {:role "button"
-                         :href (str "/regresar/renta/" casas-id)} "Regresar"]]))
+                         :href (str "/regresar/renta/" casas-id "/" proceso-id)} "Regresar"]]))
 
 (defn final-venta-button
   [row]
   (let [clientes-id (:cliente_id row)
+        proceso-id (:id row)
         casas-id (:casa_id row)]
     [:div.col.col-auto
      [:a.btn.btn-success {:role "button"
                           :style "margin-right:2px;"
-                          :href (str "/final/venta/" casas-id)} "Vendida"]
+                          :href (str "/final/venta/" casas-id "/" proceso-id)} "Vendida"]
      [:a.btn.btn-danger {:role "button"
-                         :href (str "/regresar/venta/" casas-id)} "Regresar"]]))
+                         :href (str "/regresar/venta/" casas-id "/" proceso-id)} "Regresar"]]))
 
 (defn build-house-body
   [hbuttons row]
