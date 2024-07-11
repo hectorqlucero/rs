@@ -157,5 +157,29 @@
       (error-404 "Casa se regreso correctamente!" "/venta")
       (error-404 "Hubo errores, la casa no se pudo regresar" "/venta"))))
 
+(defn renta-rentado
+  [casa-id proceso-id]
+  (let [id (crud-fix-id casa-id)
+        crow {:status "A"}
+        result (Update db :casas crow ["id = ?" id])
+        result1 (Delete db :proceso ["id = ?" proceso-id])]
+    (if (and
+         seq result
+         seq result1)
+      (error-404 "Casa se regreso correctamente!" "/renta")
+      (error-404 "Hubo errores, la casa no se pudo regresar" "/renta"))))
+
+(defn venta-vendido
+  [casa-id proceso-id]
+  (let [id (crud-fix-id casa-id)
+        crow {:status "A"}
+        result (Update db :casas crow ["id = ?" id])
+        result1 (Delete db :proceso ["id = ?" proceso-id])]
+    (if (and
+         seq result
+         seq result1)
+      (error-404 "Casa se regreso correctamente!" "/venta")
+      (error-404 "Hubo errores, la casa no se pudo regresar" "/venta"))))
+
 (comment
   (casas-view "testing" 4 (get-clientes)))
