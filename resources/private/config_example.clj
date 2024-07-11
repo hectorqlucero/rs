@@ -14,6 +14,5 @@
  :company-name "xxxxx" ; Change me
  :base-url     "https://0.0.0.0:8080/"
  :uploads      "./uploads/xxxxx/" ; Change me
- :base-url     "http://0.0.0.0:8080/"
  :img-url      "https://0.0.0.0/uploads/"
  :path         "/uploads/"}
