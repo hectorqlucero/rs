@@ -8,10 +8,11 @@
  :email-host   "xxxxx" ; Optional
  :email-user   "xxxxx" ; Optional
  :email-pwd    "xxxxx" ; Optional
- :port         3000
+ :port         8080
  :tz           "US/Pacific"
  :site-name    "xxxxx" ; Change me
  :company-name "xxxxx" ; Change me
+ :base-url     "https://0.0.0.0:8080/"
  :uploads      "./uploads/xxxxx/" ; Change me
  :base-url     "http://0.0.0.0:3000/"
  :img-url      "https://0.0.0.0/uploads/"
