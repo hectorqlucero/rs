@@ -1,6 +1,6 @@
 (ns sk.handlers.clientes.controller
   (:require [sk.layout :refer [application error-404]]
-            [sk.models.crud :refer [db crud-fix-id Insert Update Delete]]
+            [sk.models.crud :refer [db crud-fix-id Insert Update Delete Save Query]]
             [sk.models.util :refer [get-session-id]]
             [sk.handlers.clientes.model :refer [get-clientes
                                                 clientes-renta
@@ -152,34 +152,52 @@
         result (Update db :casas crow ["id = ?" id])
         result1 (Delete db :proceso ["id = ?" proceso-id])]
     (if (and
-         seq result
-         seq result1)
+         (seq result)
+         (seq result1))
       (error-404 "Casa se regreso correctamente!" "/venta")
       (error-404 "Hubo errores, la casa no se pudo regresar" "/venta"))))
 
 (defn renta-rentado
   [casa-id proceso-id]
   (let [id (crud-fix-id casa-id)
-        crow {:status "A"}
+        crow {:status "I"}
         result (Update db :casas crow ["id = ?" id])
+        cliente-id (-> (Query db ["select cliente_id from proceso where id=?" proceso-id])
+                       first
+                       :cliente_id)
+        prow {:cliente_id cliente-id
+              :casa_id casa-id}
+        result0 (Insert db :rentas prow)
         result1 (Delete db :proceso ["id = ?" proceso-id])]
     (if (and
-         seq result
-         seq result1)
-      (error-404 "Casa se regreso correctamente!" "/renta")
-      (error-404 "Hubo errores, la casa no se pudo regresar" "/renta"))))
+         (seq result)
+         (seq result0)
+         (seq result1))
+      (error-404 "Casa se rento correctamente!" "/renta")
+      (error-404 "Hubo errores, la casa no se pudo rentar" "/renta"))))
 
 (defn venta-vendido
   [casa-id proceso-id]
   (let [id (crud-fix-id casa-id)
-        crow {:status "A"}
+        crow {:status "I"}
         result (Update db :casas crow ["id = ?" id])
+        cliente-id (-> (Query db ["select cliente_id from proceso where id=?" proceso-id])
+                       first
+                       :cliente_id)
+        prow {:cliente_id cliente-id
+              :casa_id casa-id}
+        result0 (Insert db :ventas prow)
         result1 (Delete db :proceso ["id = ?" proceso-id])]
     (if (and
-         seq result
-         seq result1)
-      (error-404 "Casa se regreso correctamente!" "/venta")
-      (error-404 "Hubo errores, la casa no se pudo regresar" "/venta"))))
+         (seq result)
+         (seq result0)
+         (seq result1))
+      (error-404 "Casa se vendió correctamente!" "/clientes_activos")
+      (error-404 "Hubo errores, la casa no se pudo vender" "/clientes_activos"))))
 
 (comment
+  (-> (Query db "select cliente_id from proceso where id=2")
+      first
+      :cliente_id)
+  (:cliente_id (first (Query db "select cliente_id from proceso where id=2")))
   (casas-view "testing" 4 (get-clientes)))
