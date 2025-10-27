@@ -1,2 +1,0 @@
-ALTER TABLE casas
-DROP COLUMN tipo;

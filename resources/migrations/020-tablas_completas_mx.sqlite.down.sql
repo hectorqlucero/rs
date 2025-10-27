@@ -1,0 +1,37 @@
+-- Rollback de todas las tablas mexicanas
+DROP INDEX IF EXISTS idx_bitacora_fecha;
+DROP INDEX IF EXISTS idx_bitacora_tabla;
+DROP INDEX IF EXISTS idx_tramites_estado;
+DROP INDEX IF EXISTS idx_tramites_referencia;
+DROP INDEX IF EXISTS idx_fiadores_cliente;
+DROP INDEX IF EXISTS idx_avaluos_vigencia;
+DROP INDEX IF EXISTS idx_avaluos_propiedad;
+DROP INDEX IF EXISTS idx_documentos_vencimiento;
+DROP INDEX IF EXISTS idx_documentos_tipo;
+DROP INDEX IF EXISTS idx_documentos_referencia;
+DROP INDEX IF EXISTS idx_pagos_renta_estado;
+DROP INDEX IF EXISTS idx_alquileres_activos;
+DROP INDEX IF EXISTS idx_ventas_fecha;
+DROP INDEX IF EXISTS idx_propiedades_precio;
+DROP INDEX IF EXISTS idx_propiedades_municipio;
+DROP INDEX IF EXISTS idx_propiedades_estado;
+DROP INDEX IF EXISTS idx_propiedades_modalidad;
+DROP INDEX IF EXISTS idx_propiedades_tipo;
+DROP INDEX IF EXISTS idx_clientes_activo;
+DROP INDEX IF EXISTS idx_clientes_curp;
+DROP INDEX IF EXISTS idx_clientes_rfc;
+
+DROP TABLE IF EXISTS bitacora;
+DROP TABLE IF EXISTS tramites;
+DROP TABLE IF EXISTS fiadores;
+DROP TABLE IF EXISTS avaluos;
+DROP TABLE IF EXISTS documentos;
+DROP TABLE IF EXISTS comisiones;
+DROP TABLE IF EXISTS contratos;
+DROP TABLE IF EXISTS pagos_ventas;
+DROP TABLE IF EXISTS pagos_renta;
+DROP TABLE IF EXISTS alquileres;
+DROP TABLE IF EXISTS ventas;
+DROP TABLE IF EXISTS propiedades;
+DROP TABLE IF EXISTS agentes;
+DROP TABLE IF EXISTS clientes;
