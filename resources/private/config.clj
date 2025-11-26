@@ -22,6 +22,6 @@
  ;; --- Theme selection ---
  :theme "sketchy" ;; Options: "default" (Bootstrap), "cerulean", "slate", "minty", "lux", "cyborg", "sandstone", "superhero", "flatly", "yeti"
  ;; Optional email config
- :email-host   "smtp.example.com"
- :email-user   "user@example.com"
- :email-pwd    "emailpassword"}
+ :email-host   "smtp.fastmail.com"
+ :email-user   "hectorqlucero@fastmail.com"
+ :email-pwd    "h64k9rq89m7ba4ap"}

@@ -1,6 +1,7 @@
 (ns rs.routes.proutes
   (:require
    [compojure.core :refer [defroutes GET POST]]
+   [rs.handlers.admin.tramites.controller :as tramites-controller]
    [rs.handlers.vista_ventas_completadas.controller :as vista_ventas_completadas-dashboard]
    [rs.handlers.vista_tramites_pendientes.controller :as vista_tramites_pendientes-dashboard]
    [rs.handlers.vista_pagos_atrasados.controller :as vista_pagos_atrasados-dashboard]
@@ -33,6 +34,22 @@
    [rs.handlers.users.controller :as users-dashboard]))
 
 (defroutes proutes
+  ;; Subgrid routes for documentospropiedades (parent: propiedades)
+  (GET "/admin/documentospropiedades" params [] (documentospropiedades-controller/documentospropiedades-grid params))
+  (GET "/admin/documentospropiedades/add-form/:parent_id" [parent_id :as request] (documentospropiedades-controller/documentospropiedades-add-form request parent_id))
+  (GET "/admin/documentospropiedades/edit-form/:id" [id :as request] (documentospropiedades-controller/documentospropiedades-edit-form request id))
+  (POST "/admin/documentospropiedades/save" params [] (documentospropiedades-controller/documentospropiedades-save params))
+  (GET "/admin/documentospropiedades/delete/:id" [id :as request] (documentospropiedades-controller/documentospropiedades-delete request id))
+  (GET "/admin/tramites" params [] (tramites-controller/tramites params))
+  (GET "/admin/tramites/add-form" params [] (tramites-controller/tramites-add-form params))
+  (GET "/admin/tramites/edit-form/:id" [id :as request] (tramites-controller/tramites-edit-form request id))
+  (POST "/admin/tramites/save" params [] (tramites-controller/tramites-save params))
+  (GET "/admin/tramites/delete/:id" [id :as request] (tramites-controller/tramites-delete request id))
+  (GET "/admin/documentos" params [] (documentos-controller/documentos params))
+  (GET "/admin/documentos/add-form" params [] (documentos-controller/documentos-add-form params))
+  (GET "/admin/documentos/edit-form/:id" [id :as request] (documentos-controller/documentos-edit-form request id))
+  (POST "/admin/documentos/save" params [] (documentos-controller/documentos-save params))
+  (GET "/admin/documentos/delete/:id" [id :as request] (documentos-controller/documentos-delete request id))
   (GET "/vista_ventas_completadas" params [] (vista_ventas_completadas-dashboard/vista_ventas_completadas params))
   (GET "/vista_tramites_pendientes" params [] (vista_tramites_pendientes-dashboard/vista_tramites_pendientes params))
   (GET "/vista_pagos_atrasados" params [] (vista_pagos_atrasados-dashboard/vista_pagos_atrasados params))

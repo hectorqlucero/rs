@@ -6,7 +6,6 @@
    [rs.models.util :refer [user-level]]
    [hiccup.core :refer [html]]))
 
-;; Permissions - default to all rights if none specified
 (def allowed-rights ["U" "A" "S"])
 
 ;; Main subgrid endpoint - this is what the subgrid AJAX calls
@@ -29,7 +28,7 @@
 (defn documentospropiedades-add-form
   [request parent-id]
   (let [title "New Documentos"
-  row {:id_referencia (crud-fix-id parent-id)}
+  row {:id_propiedad (crud-fix-id parent-id)}
         user-r (user-level request)]
     (if (some #(= user-r %) allowed-rights)
       (html (build-documentos-form title row))

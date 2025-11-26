@@ -193,6 +193,3 @@
   []
   (ensure-upload-dirs!)
   (jetty/run-jetty app {:port (:port config)}))
-
-(comment
-  (:port config))

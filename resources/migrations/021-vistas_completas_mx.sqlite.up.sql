@@ -254,28 +254,34 @@ SELECT
     d.id,
     d.tipo_documento,
     d.nombre_documento,
-    d.tabla_referencia,
-    d.id_referencia,
+    CASE
+        WHEN d.id_propiedad IS NOT NULL THEN 'propiedades'
+        WHEN d.id_cliente IS NOT NULL THEN 'clientes'
+        WHEN d.id_venta IS NOT NULL THEN 'ventas'
+        WHEN d.id_alquiler IS NOT NULL THEN 'alquileres'
+        ELSE NULL
+    END AS tabla_referencia,
+    COALESCE(d.id_propiedad, d.id_cliente, d.id_venta, d.id_alquiler) AS id_referencia,
     d.fecha_vencimiento,
     ROUND(julianday(d.fecha_vencimiento) - julianday('now')) AS dias_hasta_vencimiento,
-    CASE 
-        WHEN d.tabla_referencia = 'propiedades' THEN p.titulo
-        WHEN d.tabla_referencia = 'clientes' THEN (c.nombre || ' ' || COALESCE(c.apellido_paterno, ''))
-        WHEN d.tabla_referencia = 'ventas' THEN ('Venta: ' || pv.titulo)
-        WHEN d.tabla_referencia = 'alquileres' THEN ('Renta: ' || pa.titulo)
+    CASE
+        WHEN d.id_propiedad IS NOT NULL THEN p.titulo
+        WHEN d.id_cliente IS NOT NULL THEN (c.nombre || ' ' || COALESCE(c.apellido_paterno, ''))
+        WHEN d.id_venta IS NOT NULL THEN ('Venta: ' || pv.titulo)
+        WHEN d.id_alquiler IS NOT NULL THEN ('Renta: ' || pa.titulo)
         ELSE 'N/A'
     END AS referencia_nombre,
     a.nombre || ' ' || COALESCE(a.apellido_paterno, '') AS agente_responsable,
     d.observaciones
 FROM documentos d
-LEFT JOIN propiedades p ON d.tabla_referencia = 'propiedades' AND d.id_referencia = p.id
-LEFT JOIN clientes c ON d.tabla_referencia = 'clientes' AND d.id_referencia = c.id
-LEFT JOIN ventas v ON d.tabla_referencia = 'ventas' AND d.id_referencia = v.id
+LEFT JOIN propiedades p ON d.id_propiedad = p.id
+LEFT JOIN clientes c ON d.id_cliente = c.id
+LEFT JOIN ventas v ON d.id_venta = v.id
 LEFT JOIN propiedades pv ON v.id_propiedad = pv.id
-LEFT JOIN alquileres al ON d.tabla_referencia = 'alquileres' AND d.id_referencia = al.id
+LEFT JOIN alquileres al ON d.id_alquiler = al.id
 LEFT JOIN propiedades pa ON al.id_propiedad = pa.id
 LEFT JOIN agentes a ON d.agente_subida = a.id
-WHERE d.fecha_vencimiento IS NOT NULL 
+WHERE d.fecha_vencimiento IS NOT NULL
   AND d.estado_documento = 'activo'
   AND d.fecha_vencimiento >= date('now')
 ORDER BY d.fecha_vencimiento ASC;
@@ -350,7 +356,7 @@ JOIN clientes cb ON v.id_comprador = cb.id
 JOIN clientes cp ON p.id_propietario = cp.id
 LEFT JOIN agentes a ON v.id_agente = a.id
 LEFT JOIN comisiones com ON v.id_agente = com.id_agente AND com.tipo_operacion = 'venta' AND com.id_operacion = v.id
-LEFT JOIN tramites tr ON tr.tabla_referencia = 'ventas' AND tr.id_referencia = v.id AND tr.tipo_tramite = 'escrituracion'
+LEFT JOIN tramites tr ON tr.id_venta = v.id AND tr.tipo_tramite = 'escrituracion'
 ORDER BY v.fecha_venta DESC;
 
 -- Vista de trámites pendientes
@@ -373,22 +379,22 @@ SELECT
         ELSE NULL 
     END AS dias_restantes,
     -- Información de la referencia
-    CASE 
-        WHEN t.tabla_referencia = 'ventas' THEN ('Venta: ' || pv.titulo)
-        WHEN t.tabla_referencia = 'alquileres' THEN ('Renta: ' || pa.titulo)
+    CASE
+        WHEN t.id_venta IS NOT NULL THEN ('Venta: ' || pv.titulo)
+        WHEN t.id_alquiler IS NOT NULL THEN ('Renta: ' || pa.titulo)
         ELSE 'N/A'
     END AS referencia_descripcion,
-    CASE 
-        WHEN t.tabla_referencia = 'ventas' THEN (cv.nombre || ' ' || COALESCE(cv.apellido_paterno, ''))
-        WHEN t.tabla_referencia = 'alquileres' THEN (ca.nombre || ' ' || COALESCE(ca.apellido_paterno, ''))
+    CASE
+        WHEN t.id_venta IS NOT NULL THEN (cv.nombre || ' ' || COALESCE(cv.apellido_paterno, ''))
+        WHEN t.id_alquiler IS NOT NULL THEN (ca.nombre || ' ' || COALESCE(ca.apellido_paterno, ''))
         ELSE 'N/A'
     END AS cliente_nombre,
     a.nombre || ' ' || COALESCE(a.apellido_paterno, '') AS agente_registro
 FROM tramites t
-LEFT JOIN ventas v ON t.tabla_referencia = 'ventas' AND t.id_referencia = v.id
+LEFT JOIN ventas v ON t.id_venta = v.id
 LEFT JOIN propiedades pv ON v.id_propiedad = pv.id
 LEFT JOIN clientes cv ON v.id_comprador = cv.id
-LEFT JOIN alquileres al ON t.tabla_referencia = 'alquileres' AND t.id_referencia = al.id
+LEFT JOIN alquileres al ON t.id_alquiler = al.id
 LEFT JOIN propiedades pa ON al.id_propiedad = pa.id
 LEFT JOIN clientes ca ON al.id_inquilino = ca.id
 LEFT JOIN agentes a ON t.agente_registro = a.id

@@ -3,7 +3,62 @@
    [clojure.string :as st]
    [buddy.hashers :as hashers]
    [clojure.java.jdbc :as jdbc]
-   [rs.models.crud :as crud :refer [Insert-multi Query!]]))
+   [rs.models.crud :as crud :refer [Insert-multi Query!]]
+   [clj-time.core :as t]
+   [clj-time.format :as f]))
+
+;; ===============================================
+;; DATE UTILITIES FOR RELATIVE SEEDING
+;; ===============================================
+
+(def date-formatter (f/formatter "yyyy-MM-dd"))
+(def month-year-formatter (f/formatter "yyyy-MM"))
+
+(defn today
+  "Get today's date as a string in YYYY-MM-DD format"
+  []
+  (f/unparse date-formatter (t/now)))
+
+(defn date-days-ago
+  "Get date N days ago as a string in YYYY-MM-DD format"
+  [days]
+  (f/unparse date-formatter (t/minus (t/now) (t/days days))))
+
+(defn date-days-ahead
+  "Get date N days ahead as a string in YYYY-MM-DD format"
+  [days]
+  (f/unparse date-formatter (t/plus (t/now) (t/days days))))
+
+(defn date-months-ago
+  "Get date N months ago as a string in YYYY-MM-DD format"
+  [months]
+  (f/unparse date-formatter (t/minus (t/now) (t/months months))))
+
+(defn date-months-ahead
+  "Get date N months ahead as a string in YYYY-MM-DD format"
+  [months]
+  (f/unparse date-formatter (t/plus (t/now) (t/months months))))
+
+(defn format-month-year
+  "Format date as YYYY-MM for monthly records"
+  [date-str suffix]
+  (let [date (f/parse date-formatter date-str)]
+    (str (f/unparse month-year-formatter date) suffix)))
+
+(defn month-year-days-ago
+  "Get month-year N days ago as YYYY-MM format"
+  [days]
+  (f/unparse month-year-formatter (t/minus (t/now) (t/days days))))
+
+(defn month-year-months-ago
+  "Get month-year N months ago as YYYY-MM format"
+  [months]
+  (f/unparse month-year-formatter (t/minus (t/now) (t/months months))))
+
+(defn month-year-months-ahead
+  "Get month-year N months ahead as YYYY-MM format"
+  [months]
+  (f/unparse month-year-formatter (t/plus (t/now) (t/months months))))
 
 ;; ===============================================
 ;; USUARIOS DEL SISTEMA (Authentication only - 3 users)
@@ -13,7 +68,7 @@
     :firstname "Regular"
     :username  "user@example.com"
     :password  (hashers/derive "user")
-    :dob       "1957-02-07"
+    :dob       (date-months-ago 300) ; ~25 years ago
     :email     "user@example.com"
     :level     "U"
     :active    "T"}
@@ -21,7 +76,7 @@
     :firstname "Admin"
     :username "admin@example.com"
     :password (hashers/derive "admin")
-    :dob "1957-02-07"
+    :dob (date-months-ago 300)
     :email "admin@example.com"
     :level "A"
     :active "T"}
@@ -29,7 +84,7 @@
     :firstname "System"
     :username "system@example.com"
     :password (hashers/derive "system")
-    :dob "1957-02-07"
+    :dob (date-months-ago 300)
     :email "system@example.com"
     :level "S"
     :active "T"}])
@@ -449,7 +504,7 @@
     :perito_valuador "Ing. José Manuel Pérez Avalúos"
     :cedula_perito "AVA123456"
     :institucion_perito "INDAABIN"
-    :fecha_avaluo "2025-01-15"
+    :fecha_avaluo (date-days-ago 30)
     :valor_avaluo 8200000
     :metodo_valuacion "comparativo_mercado"
     :proposito_avaluo "credito_hipotecario"
@@ -457,12 +512,12 @@
     :superficie_construccion_avaluo 220
     :estado_conservacion "bueno"
     :numero_avaluo "AVA-2025-001"
-    :fecha_vencimiento "2025-07-15"}
+    :fecha_vencimiento (date-months-ahead 6)}
    {:id_propiedad 2
     :perito_valuador "Arq. Laura González Valuaciones"
     :cedula_perito "AVA789012"
     :institucion_perito "FOVISSSTE"
-    :fecha_avaluo "2025-02-01"
+    :fecha_avaluo (date-days-ago 15)
     :valor_avaluo 4100000
     :metodo_valuacion "fisico"
     :proposito_avaluo "seguro"
@@ -470,12 +525,12 @@
     :superficie_construccion_avaluo 85
     :estado_conservacion "excelente"
     :numero_avaluo "AVA-2025-002"
-    :fecha_vencimiento "2025-08-01"}
+    :fecha_vencimiento (date-months-ahead 7)}
    {:id_propiedad 3
     :perito_valuador "Ing. Ricardo Morales y Asociados"
     :cedula_perito "AVA345678"
     :institucion_perito "INDAABIN"
-    :fecha_avaluo "2025-03-01"
+    :fecha_avaluo (today)
     :valor_avaluo 6000000
     :metodo_valuacion "comparativo_mercado"
     :proposito_avaluo "venta"
@@ -483,7 +538,7 @@
     :superficie_construccion_avaluo 180
     :estado_conservacion "bueno"
     :numero_avaluo "AVA-2025-003"
-    :fecha_vencimiento "2025-09-01"}])
+    :fecha_vencimiento (date-months-ahead 8)}])
 
 ;; ===============================================
 ;; FIADORES Y GARANTÍAS
@@ -497,7 +552,7 @@
     :ingresos_fiador 60000
     :relacion_cliente "padre"
     :monto_garantia 50000
-    :fecha_constitucion "2025-01-15"
+    :fecha_constitucion (date-days-ago 45)
     :estado_garantia "activa"}
    {:id_cliente 7
     :tipo_garantia "aval_bancario"
@@ -507,7 +562,7 @@
     :ingresos_fiador 0
     :relacion_cliente "institucion"
     :monto_garantia 84000
-    :fecha_constitucion "2025-02-01"
+    :fecha_constitucion (date-days-ago 30)
     :estado_garantia "activa"}
    {:id_cliente 8
     :tipo_garantia "deposito"
@@ -517,7 +572,7 @@
     :ingresos_fiador 0
     :relacion_cliente "propio"
     :monto_garantia 64000
-    :fecha_constitucion "2025-03-15"
+    :fecha_constitucion (date-days-ago 15)
     :estado_garantia "activa"}])
 
 ;; ===============================================
@@ -527,7 +582,7 @@
   [{:id_propiedad 1
     :id_comprador 6
     :id_agente 1
-    :fecha_venta "2025-04-15"
+    :fecha_venta (date-days-ago 60)
     :precio_venta 8200000
     :enganche 1640000
     :tipo_credito "infonavit"
@@ -545,8 +600,8 @@
   [{:id_propiedad 2
     :id_inquilino 7
     :id_agente 2
-    :fecha_inicio "2025-01-01"
-    :fecha_fin "2026-01-01"
+    :fecha_inicio (date-months-ago 3)
+    :fecha_fin (date-months-ahead 9)
     :monto_mensual 25000
     :deposito_garantia 50000
     :primer_mes 25000
@@ -560,8 +615,8 @@
    {:id_propiedad 4
     :id_inquilino 8
     :id_agente 4
-    :fecha_inicio "2025-02-15"
-    :fecha_fin "2026-02-15"
+    :fecha_inicio (date-months-ago 2)
+    :fecha_fin (date-months-ahead 10)
     :monto_mensual 45000
     :deposito_garantia 90000
     :primer_mes 45000
@@ -579,58 +634,58 @@
 (def pagos-renta-rows
   [;; Pagos del departamento (inquilino puntual)
    {:id_alquiler 1
-    :mes_correspondiente "2025-08"
+    :mes_correspondiente (month-year-months-ago 1)
     :monto 25000
-    :fecha_pago "2025-08-01"
+    :fecha_pago (date-months-ago 1)
     :metodo_pago "transferencia"
     :estado_pago "pagado"
     :numero_recibo "REC-001-08"
     :agente_registro 2}
    {:id_alquiler 1
-    :mes_correspondiente "2025-09"
+    :mes_correspondiente (month-year-days-ago 0)
     :monto 25000
-    :fecha_pago "2025-09-01"
+    :fecha_pago (today)
     :metodo_pago "transferencia"
     :estado_pago "pagado"
     :numero_recibo "REC-001-09"
     :agente_registro 2}
    {:id_alquiler 1
-    :mes_correspondiente "2025-10"
+    :mes_correspondiente (month-year-months-ahead 1)
     :monto 25000
-    :fecha_pago "2025-10-01"
+    :fecha_pago (date-months-ahead 1)
     :metodo_pago "transferencia"
     :estado_pago "pagado"
     :numero_recibo "REC-001-10"
     :agente_registro 2}
    ;; Pagos del local (con un atraso)
    {:id_alquiler 2
-    :mes_correspondiente "2025-07"
+    :mes_correspondiente (month-year-months-ago 2)
     :monto 45000
-    :fecha_pago "2025-07-15"
+    :fecha_pago (date-days-ago 15)
     :metodo_pago "cheque"
     :estado_pago "pagado"
     :numero_recibo "REC-002-07"
     :agente_registro 4}
    {:id_alquiler 2
-    :mes_correspondiente "2025-08"
+    :mes_correspondiente (month-year-months-ago 1)
     :monto 45000
-    :fecha_pago "2025-08-10"
+    :fecha_pago (date-days-ago 20)
     :metodo_pago "cheque"
     :estado_pago "pagado"
     :numero_recibo "REC-002-08"
     :agente_registro 4}
    {:id_alquiler 2
-    :mes_correspondiente "2025-09"
+    :mes_correspondiente (month-year-days-ago 0)
     :monto 45000
-    :fecha_pago "2025-09-08"
+    :fecha_pago (date-days-ago 22)
     :metodo_pago "efectivo"
     :estado_pago "pagado"
     :numero_recibo "REC-002-09"
     :agente_registro 4}
    {:id_alquiler 2
-    :mes_correspondiente "2025-10"
+    :mes_correspondiente (month-year-months-ahead 1)
     :monto 45000
-    :fecha_pago "2025-10-25"
+    :fecha_pago (date-days-ahead 5)
     :metodo_pago "transferencia"
     :estado_pago "atrasado"
     :dias_atraso 20
@@ -644,82 +699,133 @@
   [{:id_venta 1
     :tipo_pago "enganche"
     :monto 1640000
-    :fecha_pago "2025-09-15"
+    :fecha_pago (date-days-ago 45)
     :metodo_pago "transferencia"
     :numero_recibo "VEN-001-ENG"
     :agente_registro 1}
    {:id_venta 1
     :tipo_pago "escrituracion"
     :monto 344000
-    :fecha_pago "2025-10-01"
+    :fecha_pago (date-days-ago 30)
     :metodo_pago "cheque"
     :numero_recibo "VEN-001-ESC"
     :agente_registro 1}])
 
 ;; ===============================================
-;; DOCUMENTOS (con agente_subida correcto)
+;; DOCUMENTOS (with new nullable FK structure)
 ;; ===============================================
 (def documentos-rows
-  [{:tipo_documento "escritura"
+  [;; Property documents
+   {:tipo_documento "escritura"
     :nombre_documento "Escritura Casa Roma Norte"
-    :tabla_referencia "propiedades"
-    :id_referencia 1
+    :descripcion "Escritura de propiedad"
+    :id_propiedad 1
+    :id_cliente nil
+    :id_venta nil
+    :id_alquiler nil
+    :ruta_archivo "/uploads/escrituras/esc001.pdf"
+    :nombre_archivo "esc001.pdf"
+    :tamanio_kb 2048
+    :mime_type "application/pdf"
     :fecha_vencimiento nil
     :estado_documento "activo"
-    :agente_subida 1}
-   {:tipo_documento "identificacion"
-    :nombre_documento "INE Juan Pérez"
-    :tabla_referencia "clientes"
-    :id_referencia 1
-    :fecha_vencimiento "2029-03-15"
-    :estado_documento "activo"
-    :agente_subida 1}
-   {:tipo_documento "comprobante_ingresos"
-    :nombre_documento "Recibos de nómina Andrea Torres"
-    :tabla_referencia "clientes"
-    :id_referencia 6
-    :fecha_vencimiento "2025-01-15"
-    :estado_documento "activo"
-    :agente_subida 2}
-   {:tipo_documento "contrato"
-    :nombre_documento "Contrato renta Condesa"
-    :tabla_referencia "alquileres"
-    :id_referencia 1
-    :fecha_vencimiento "2025-08-01"
-    :estado_documento "activo"
-    :agente_subida 2}
+    :agente_subida 1
+    :observaciones "Escritura original"}
    {:tipo_documento "avaluo"
     :nombre_documento "Avalúo Casa Roma Norte"
-    :tabla_referencia "propiedades"
-    :id_referencia 1
-    :fecha_vencimiento "2025-04-01"
+    :descripcion "Avalúo bancario"
+    :id_propiedad 1
+    :id_cliente nil
+    :id_venta nil
+    :id_alquiler nil
+    :ruta_archivo "/uploads/avaluos/aval001.pdf"
+    :nombre_archivo "aval001.pdf"
+    :tamanio_kb 1024
+    :mime_type "application/pdf"
+    :fecha_vencimiento (date-months-ahead 3)
     :estado_documento "activo"
-    :agente_subida 1}])
+    :agente_subida 1
+    :observaciones "Avalúo para crédito hipotecario"}
+   ;; Client documents
+   {:tipo_documento "identificacion"
+    :nombre_documento "INE Juan Pérez"
+    :descripcion "Credencial de elector"
+    :id_propiedad nil
+    :id_cliente 1
+    :id_venta nil
+    :id_alquiler nil
+    :ruta_archivo "/uploads/identificaciones/ine001.jpg"
+    :nombre_archivo "ine001.jpg"
+    :tamanio_kb 512
+    :mime_type "image/jpeg"
+    :fecha_vencimiento (date-months-ahead 36)
+    :estado_documento "activo"
+    :agente_subida 1
+    :observaciones "INE vigente"}
+   {:tipo_documento "comprobante_ingresos"
+    :nombre_documento "Recibos de nómina Andrea Torres"
+    :descripcion "Comprobante de ingresos mensuales"
+    :id_propiedad nil
+    :id_cliente 6
+    :id_venta nil
+    :id_alquiler nil
+    :ruta_archivo "/uploads/comprobantes/comp001.pdf"
+    :nombre_archivo "comp001.pdf"
+    :tamanio_kb 768
+    :mime_type "application/pdf"
+    :fecha_vencimiento (date-months-ahead 1)
+    :estado_documento "activo"
+    :agente_subida 2
+    :observaciones "Recibos últimos 3 meses"}
+   ;; Rental documents
+   {:tipo_documento "contrato"
+    :nombre_documento "Contrato renta Condesa"
+    :descripcion "Contrato de arrendamiento"
+    :id_propiedad nil
+    :id_cliente nil
+    :id_venta nil
+    :id_alquiler 1
+    :ruta_archivo "/uploads/contratos/cont001.pdf"
+    :nombre_archivo "cont001.pdf"
+    :tamanio_kb 1536
+    :mime_type "application/pdf"
+    :fecha_vencimiento (date-months-ahead 9)
+    :estado_documento "activo"
+    :agente_subida 2
+    :observaciones "Contrato firmado por ambas partes"}])
 
 ;; ===============================================
-;; TRÁMITES EN PROCESO (con agente_registro correcto)
+;; TRÁMITES (with new nullable FK structure)
 ;; ===============================================
 (def tramites-rows
-  [{:tabla_referencia "ventas"
-    :id_referencia 1
+  [{:id_venta 1
+    :id_alquiler nil
     :tipo_tramite "escrituracion"
     :descripcion "Escrituración Casa Roma Norte"
     :dependencia "Notaría 45"
-    :fecha_inicio "2025-09-15"
-    :fecha_estimada_fin "2025-12-15"
+    :numero_expediente "EXP-2025-001"
+    :fecha_inicio (date-days-ago 45)
+    :fecha_estimada_fin (date-months-ahead 1)
     :estado_tramite "en_proceso"
+    :costo_tramite 180000
     :responsable "Lic. María Teresa Sánchez"
-    :agente_registro 1}
-   {:tabla_referencia "propiedades"
-    :id_referencia 5
-    :tipo_tramite "factibilidad"
-    :descripcion "Factibilidad de servicios terreno Coyoacán"
-    :dependencia "CFE/SACMEX"
-    :fecha_inicio "2025-10-01"
-    :fecha_estimada_fin "2025-11-15"
-    :estado_tramite "pendiente"
-    :responsable "Arq. Luis González"
-    :agente_registro 5}])
+    :observaciones "Esperando avalúo final"
+    :agente_registro 1
+    :fecha_registro (date-days-ago 45)}
+   {:id_venta nil
+    :id_alquiler 1
+    :tipo_tramite "registro_contrato"
+    :descripcion "Registro contrato renta Condesa"
+    :dependencia "Registro Público de la Propiedad"
+    :numero_expediente "RPP-2025-045"
+    :fecha_inicio (date-months-ago 3)
+    :fecha_estimada_fin (date-months-ago 2)
+    :estado_tramite "completado"
+    :costo_tramite 2500
+    :responsable "Lic. Roberto Mendoza García"
+    :observaciones "Contrato registrado exitosamente"
+    :agente_registro 2
+    :fecha_registro (date-months-ago 3)}])
 
 ;; ===============================================
 ;; COMISIONES
@@ -729,24 +835,24 @@
     :tipo_operacion "venta"
     :id_operacion 1
     :monto 246000
-    :fecha_generada "2025-09-15"
+    :fecha_generada (date-days-ago 45)
     :pagada 0
     :observaciones "Comisión 3% venta Casa Roma Norte"}
    {:id_agente 2
     :tipo_operacion "renta"
     :id_operacion 1
     :monto 875
-    :fecha_generada "2025-08-01"
+    :fecha_generada (date-months-ago 3)
     :pagada 1
-    :fecha_pago "2025-08-15"
+    :fecha_pago (date-months-ago 2)
     :observaciones "Comisión 3.5% renta Depto Condesa"}
    {:id_agente 4
     :tipo_operacion "renta"
     :id_operacion 2
     :monto 1350
-    :fecha_generada "2025-07-15"
+    :fecha_generada (date-months-ago 2)
     :pagada 1
-    :fecha_pago "2025-07-30"
+    :fecha_pago (date-months-ago 1)
     :observaciones "Comisión 3% renta Local Zona Rosa"}])
 
 (defn- normalize-token [s]

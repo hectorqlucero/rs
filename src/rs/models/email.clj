@@ -18,16 +18,6 @@
 ;;                          :content      (java.io.File. "/tmp/a.pdf")
 ;;                          :content-type "application/pdf"}]})
 ;;{:code 0, :error :SUCCESS, :message "message sent"}      ;Returned error messages
-;;
-;;{:host "mail.gmx.com"
-;; :user "xxxxxxx@gmx.com"
-;; :pass "xxxxxxx"
-;; :tls  true}
-;;
-;;{:host "smtp.gmail.com"
-;; :user "xxxxxxx@gmx.com"
-;; :pass "xxxxxxxx"
-;; :ssl  true}
 
 (def host
   {:host (:email-host config)
@@ -43,6 +33,3 @@
               :content "<b>Testing</b>"}]})
 (defn send-email [host body]
   (send-message host body))
-
-(comment 
-  (send-email host body))

@@ -1,7 +1,6 @@
 (ns rs.handlers.admin.documentos.view
   (:require [rs.models.form :refer [form build-field build-modal-buttons]]
-            [rs.models.grid :refer [build-grid build-grid-with-subgrids]]
-            [rs.models.util :refer [smart-build-field-config]]))
+            [rs.models.grid :refer [build-grid build-grid-with-subgrids]]))
 
 ;; documentos-view: If you want to show subgrids, pass a :subgrids vector in args.
 ;; Example:
@@ -19,8 +18,8 @@
 
 (defn documentos-view
   [title rows & [args]]
-  (let [labels ["Tipo Documento" "Nombre" "Tabla Referencia" "Estado"]
-        db-fields [:tipo_documento :nombre_documento :tabla_referencia :estado_documento]
+  (let [labels ["Tipo" "Nombre" "Propiedad" "Cliente" "Venta" "Alquiler" "Estado"]
+        db-fields [:tipo_documento :nombre_documento :id_propiedad :id_cliente :id_venta :id_alquiler :estado_documento]
         fields (apply array-map (interleave db-fields labels))
         table-id "documentos_table"
         href "/admin/documentos"
@@ -32,36 +31,16 @@
 (defn build-documentos-fields
   [row]
   (list
-   (build-field {:id "id" :type "hidden" :name "id" :value (:id row)})
+    (build-field {:id "id" :type "hidden" :name "id" :value (:id row)})
+    (build-field {:label "Tipo" :type "text" :id "tipo_documento" :name "tipo_documento" :placeholder "Tipo here..." :required false :value (get row :tipo_documento)})
+(build-field {:label "Nombre" :type "text" :id "nombre_documento" :name "nombre_documento" :placeholder "Nombre here..." :required false :value (get row :nombre_documento)})
+(build-field {:label "Propiedad" :type "text" :id "id_propiedad" :name "id_propiedad" :placeholder "Propiedad here..." :required false :value (get row :id_propiedad)})
+(build-field {:label "Cliente" :type "text" :id "id_cliente" :name "id_cliente" :placeholder "Cliente here..." :required false :value (get row :id_cliente)})
+(build-field {:label "Venta" :type "text" :id "id_venta" :name "id_venta" :placeholder "Venta here..." :required false :value (get row :id_venta)})
+(build-field {:label "Alquiler" :type "text" :id "id_alquiler" :name "id_alquiler" :placeholder "Alquiler here..." :required false :value (get row :id_alquiler)})
+(build-field {:label "Estado" :type "text" :id "estado_documento" :name "estado_documento" :placeholder "Estado here..." :required false :value (get row :estado_documento)})
 
-   ;; Smart fields based on database schema and migration comments
-   (build-field (smart-build-field-config {:field-name "tipo_documento" :db-type "TEXT"
-                                           :comment "escritura, avaluo, cedula_catastral, acta_matrimonio, acta_nacimiento, ine, comprobante_ingresos, comprobante_domicilio, contrato_credito"
-                                           :table-name "documentos" :required true :value (get row :tipo_documento)}))
-
-   (build-field (smart-build-field-config {:field-name "nombre_documento" :db-type "TEXT" :comment nil
-                                           :table-name "documentos" :required true :value (get row :nombre_documento)}))
-
-   (build-field (smart-build-field-config {:field-name "ruta_archivo" :db-type "TEXT" :comment nil
-                                           :table-name "documentos" :required false :value (get row :ruta_archivo)}))
-
-   (build-field (smart-build-field-config {:field-name "tabla_referencia" :db-type "TEXT"
-                                           :comment "propiedades, clientes, agentes, ventas, alquileres, tramites"
-                                           :table-name "documentos" :required true :value (get row :tabla_referencia)}))
-
-   (build-field (smart-build-field-config {:field-name "id_referencia" :db-type "INTEGER" :comment nil
-                                           :table-name "documentos" :required true :value (get row :id_referencia)}))
-
-   (build-field (smart-build-field-config {:field-name "fecha_subida" :db-type "DATETIME" :comment nil
-                                           :table-name "documentos" :required false :value (get row :fecha_subida)}))
-
-   (build-field (smart-build-field-config {:field-name "estado_documento" :db-type "TEXT"
-                                           :comment "pendiente, aprobado, rechazado"
-                                           :table-name "documentos" :required false :value (get row :estado_documento)}))
-
-   ;; Foreign key field
-   (build-field (smart-build-field-config {:field-name "id_agente" :db-type "INTEGER" :comment nil
-                                           :table-name "documentos" :required false :value (get row :id_agente)}))))
+  ))
 
 (defn documentos-form-view
   [title row]

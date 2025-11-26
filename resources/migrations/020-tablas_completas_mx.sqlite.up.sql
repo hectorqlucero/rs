@@ -282,8 +282,11 @@ CREATE TABLE documentos (
     tipo_documento TEXT NOT NULL, -- escritura, identificacion, comprobante_ingresos, contrato, avaluo, etc.
     nombre_documento TEXT NOT NULL,
     descripcion TEXT,
-    tabla_referencia TEXT, -- propiedades, clientes, ventas, alquileres
-    id_referencia INTEGER,
+    -- Polymorphic references with nullable FKs (exactly one should be non-null)
+    id_propiedad INTEGER REFERENCES propiedades(id),
+    id_cliente INTEGER REFERENCES clientes(id),
+    id_venta INTEGER REFERENCES ventas(id),
+    id_alquiler INTEGER REFERENCES alquileres(id),
     ruta_archivo TEXT, -- path del archivo físico
     nombre_archivo TEXT,
     tamanio_kb INTEGER,
@@ -291,9 +294,9 @@ CREATE TABLE documentos (
     fecha_subida DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_vencimiento DATE, -- para documentos que vencen como identificaciones
     estado_documento TEXT DEFAULT 'activo', -- activo, vencido, cancelado
-    agente_subida INTEGER, -- referencia a agentes.id
-    observaciones TEXT,
-    FOREIGN KEY (agente_subida) REFERENCES agentes(id)
+    agente_subida INTEGER REFERENCES agentes(id),
+    observaciones TEXT
+    -- Removed CHECK constraint for SQLite compatibility
 );
 
 -- Tabla para avalúos profesionales
@@ -344,8 +347,9 @@ CREATE TABLE fiadores (
 -- Tabla para seguimiento de trámites (muy importante en México)
 CREATE TABLE tramites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tabla_referencia TEXT NOT NULL, -- ventas, alquileres
-    id_referencia INTEGER NOT NULL,
+    -- Polymorphic references (only ventas and alquileres for tramites)
+    id_venta INTEGER REFERENCES ventas(id),
+    id_alquiler INTEGER REFERENCES alquileres(id),
     tipo_tramite TEXT NOT NULL, -- escrituracion, registro_rpp, avaluo, credito, etc.
     descripcion TEXT,
     dependencia TEXT, -- notaría, RPP, banco, IMSS, etc.
@@ -357,9 +361,9 @@ CREATE TABLE tramites (
     costo_tramite REAL,
     responsable TEXT, -- quién está encargado del trámite
     observaciones TEXT,
-    agente_registro INTEGER,
-    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (agente_registro) REFERENCES agentes(id)
+    agente_registro INTEGER REFERENCES agentes(id),
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    -- Removed CHECK constraint for SQLite compatibility
 );
 
 -- Tabla de bitácora/auditoría
@@ -391,7 +395,10 @@ CREATE INDEX idx_ventas_fecha ON ventas(fecha_venta);
 CREATE INDEX idx_alquileres_activos ON alquileres(estado_alquiler);
 CREATE INDEX idx_pagos_renta_estado ON pagos_renta(estado_pago);
 
-CREATE INDEX idx_documentos_referencia ON documentos(tabla_referencia, id_referencia);
+CREATE INDEX idx_documentos_propiedad ON documentos(id_propiedad);
+CREATE INDEX idx_documentos_cliente ON documentos(id_cliente);
+CREATE INDEX idx_documentos_venta ON documentos(id_venta);
+CREATE INDEX idx_documentos_alquiler ON documentos(id_alquiler);
 CREATE INDEX idx_documentos_tipo ON documentos(tipo_documento);
 CREATE INDEX idx_documentos_vencimiento ON documentos(fecha_vencimiento);
 
@@ -399,7 +406,8 @@ CREATE INDEX idx_avaluos_propiedad ON avaluos(id_propiedad);
 CREATE INDEX idx_avaluos_vigencia ON avaluos(estado_avaluo, fecha_vencimiento);
 
 CREATE INDEX idx_fiadores_cliente ON fiadores(id_cliente);
-CREATE INDEX idx_tramites_referencia ON tramites(tabla_referencia, id_referencia);
+CREATE INDEX idx_tramites_venta ON tramites(id_venta);
+CREATE INDEX idx_tramites_alquiler ON tramites(id_alquiler);
 CREATE INDEX idx_tramites_estado ON tramites(estado_tramite);
 
 CREATE INDEX idx_bitacora_tabla ON bitacora(tabla, id_registro);

@@ -18,7 +18,68 @@ pom.xml.asc
 .hg/
 .calva/
 .clj-kondo/
+.lsp/
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.cache
+*~
+*.swp
+*.swo
+.cpcache/
 
 # Database files
 db/rs.sqlite
 db/rs.sqlite.*
+db/*.db
+db/*.sqlite*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Leiningen
+.lein-failures
+.lein-repl-history
+.nrepl-port
+.prepl-port
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup

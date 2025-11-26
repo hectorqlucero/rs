@@ -113,15 +113,3 @@
                              [(build-subgrid-defroutes table parent-table)]
                              "(defroutes proutes"))
 
-(comment
-  (process-grid "rs")
-  (build-defroutes-reporte "users")
-  (build-reporte-require "users")
-  (process-report "users")
-  (process-dashboard "amigos")
-  (process-grid "amigos")
-
-  ;; New subgrid functionality
-  (process-subgrid "user_contacts" "users")
-  (process-subgrid "user_roles" "users")
-  (build-subgrid-defroutes "user_contacts" "users"))
