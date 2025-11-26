@@ -18,3 +18,7 @@ pom.xml.asc
 .hg/
 .calva/
 .clj-kondo/
+
+# Database files
+db/rs.sqlite
+db/rs.sqlite.*
