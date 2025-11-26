@@ -83,3 +83,4 @@ tramp
 *.temp
 *.bak
 *.backup
+resources/private/config.clj
